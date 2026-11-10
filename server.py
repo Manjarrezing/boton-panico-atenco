@@ -54,7 +54,7 @@ def login_admin():
     return '''
     <div style="max-width:350px;margin:80px auto;font-family:sans-serif;text-align:center;border:1px solid #ddd;padding:25px;border-radius:12px">
     <h2>🚨 CENTRAL PANICO 🚨<br>XONACATLÁN</h2>
-    <p>Inicia sesion para entrar al dashboard</p>
+    <p>Inicia sesion para entrar</p>
     <form method="POST">
     <input name="usuario" placeholder="Usuario" style="width:100%;padding:12px;margin:5px 0;border-radius:8px;border:1px solid #ccc"><br>
     <input name="password" type="password" placeholder="Contraseña" style="width:100%;padding:12px;margin:5px 0;border-radius:8px;border:1px solid #ccc"><br>
