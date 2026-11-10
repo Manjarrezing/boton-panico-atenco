@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Botón Pánico - Atenco</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#0a5cad">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+body{font-family:Arial;background:#0a5cad;color:white;text-align:center;margin:0;padding:16px}
+.card{background:white;color:#222;border-radius:14px;padding:14px;margin:10px 0;text-align:left}
+input,select{width:100%;padding:13px;margin:6px 0;border-radius:10px;border:1px solid #ccc;font-size:16px;box-sizing:border-box}
+#btn{width:230px;height:230px;border-radius:50%;background:#e00;color:white;font-size:28px;font-weight:bold;border:10px solid #ff5555;box-shadow:0 0 50px red;margin:16px 0;touch-action:none}
+#btn.activo{animation:p .5s infinite}@keyframes p{50%{opacity:.4}}
+#instalar{display:none;background:#0a0;color:white;padding:12px;border-radius:10px;border:none;width:100%;font-size:16px}
+</style></head>
+<body>
+<h3>🛡️ SAN MATEO ATENCO<br><small>BOTÓN DE PÁNICO</small></h3>
+<button id="instalar">📲 INSTALAR APP</button>
+<div class="card" id="loginBox">
+  <b>Ingresa tu Folio o Celular</b>
+  <input id="folio" placeholder="Folio: Ej. 582-1877 o Celular">
+  <button onclick="login()" style="width:100%;padding:13px;background:#0a5cad;color:white;border:none;border-radius:10px">Entrar</button>
+  <p id="loginErr" style="color:red"></p>
+  <p style="font-size:12px">Prueba: <b>582-1877</b> - Aracely Jimenez</p>
+</div>
+<div class="card" id="userBox" style="display:none">
+  <b id="nombreUser"></b><br><span id="folioUser"></span><br><span id="celUser"></span>
+  <select id="tipo"><option value="PANICO">🚨 PANICO GENERAL</option><option value="VIOLENCIA">⚠️ VIOLENCIA</option><option value="MEDICA">🚑 MEDICA</option><option value="ACOSO">⚠️ ACOSO</option></select>
+  <input id="mensaje" placeholder="Notas: Ej. AHORA no puedo hablar">
+</div>
+<button id="btn" style="display:none">¡PANICO!<br><small>Mantén 1 seg</small></button>
+<p id="status">📍 Esperando GPS...</p>
+<p id="info" style="font-size:13px"></p>
+<button id="cancel" style="display:none;padding:12px;border-radius:10px">Cancelar falsa alarma</button>
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/static/sw.js').catch(()=>{});
+let deferred; window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;document.getElementById('instalar').style.display='block';});
+document.getElementById('instalar').onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null;}};
+const socket=io({transports:['websocket','polling']});
+let usuaria=null, lat=0,lng=0,prec=0,enviando=false,timer=null;
+if(localStorage.getItem('folio')) document.getElementById('folio').value=localStorage.getItem('folio');
+async function login(){
+  let folio=document.getElementById('folio').value.trim(); if(!folio) return;
+  let r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({folio})});
+  let j=await r.json();
+  if(!j.ok){ document.getElementById('loginErr').innerText='Folio no encontrado'; return; }
+  usuaria=j.usuaria; localStorage.setItem('folio',folio);
+  document.getElementById('loginBox').style.display='none';
+  document.getElementById('userBox').style.display='block';
+  document.getElementById('btn').style.display='inline-block';
+  document.getElementById('nombreUser').innerText=usuaria.nombres+' '+usuaria.apellidos;
+  document.getElementById('folioUser').innerText='Folio: '+usuaria.folio+' | MAC: '+(usuaria.mac||'');
+  document.getElementById('celUser').innerText='Cel: '+usuaria.celular;
+  document.getElementById('mensaje').value=usuaria.notas||'';
+}
+if(localStorage.getItem('folio')) login();
+if(navigator.geolocation){
+  navigator.geolocation.watchPosition(p=>{lat=p.coords.latitude;lng=p.coords.longitude;prec=p.coords.accuracy;document.getElementById('status').innerText=`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)} Prec ${prec.toFixed(0)}m`; if(enviando) socket.emit('ubicacion_vivo',{folio:usuaria.folio,lat,lng,precision:prec});},e=>{document.getElementById('status').innerText='⚠️ Activa GPS: Ajustes > Safari/Chrome > Ubicación > Permitir';},{enableHighAccuracy:true,maximumAge:0,timeout:10000});
+}
+let btn=document.getElementById('btn');
+btn.addEventListener('touchstart',e=>{e.preventDefault();timer=setTimeout(mandar,700);});
+btn.addEventListener('touchend',()=>clearTimeout(timer));
+btn.addEventListener('mousedown',()=>{timer=setTimeout(mandar,700);});
+btn.addEventListener('mouseup',()=>clearTimeout(timer));
+function mandar(){
+  if(!usuaria){alert('Entra con tu folio primero');return;}
+  if(navigator.vibrate) navigator.vibrate([300,100,300]);
+  let data={folio:usuaria.folio,lat,lng,precision:prec,tipo:document.getElementById('tipo').value,mensaje:document.getElementById('mensaje').value};
+  socket.emit('panico',data);
+  enviando=true; btn.classList.add('activo'); btn.innerHTML='ALERTA<br>ENVIADA';
+  document.getElementById('info').innerText='✅ ALERTA ENVIADA - Siguiendo ubicación en vivo';
+  document.getElementById('cancel').style.display='inline-block';
+  if(!navigator.onLine){
+    let sms=`🚨 PANICO ${data.tipo} Soy ${usuaria.nombres} Folio ${usuaria.folio} Ubic https://maps.google.com/?q=${lat},${lng}`;
+    window.location.href=`sms:+527224501111?body=${encodeURIComponent(sms)}`;
+  }
+  setTimeout(()=>socket.emit('panico',data),4000);
+}
+document.getElementById('cancel').onclick=()=>{enviando=false;btn.classList.remove('activo');btn.innerHTML='¡PANICO!<br><small>Mantén 1 seg</small>';};
+</script></body></html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Central - San Mateo Atenco</title>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Arial;background:#0a5cad;color:#222}
+#top{background:#0a5cad;color:white;display:flex;justify-content:space-between;padding:8px 16px;align-items:center}
+#layout{display:flex;min-height:92vh}
+#sidebar{width:150px;background:#0a5cad;color:white;padding:14px}
+#sidebar div{padding:10px;cursor:pointer;border-radius:8px}
+#sidebar div:hover,#sidebar .active{background:#084a8a}
+#main{flex:1;background:#0a5cad;padding:10px;display:flex;gap:10px}
+#left{flex:2}
+#right{width:380px;background:linear-gradient(#7b2d8b,#5a1e6a);color:white;border-radius:16px;padding:12px;overflow-y:auto}
+.card{background:white;border-radius:10px;padding:10px;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:13px} th{background:#0a5cad;color:white;padding:6px} td{padding:6px;border-bottom:1px solid #ddd;cursor:pointer} tr:hover{background:#eef}
+#map{height:280px;border-radius:10px}
+#foto{width:140px;height:140px;border-radius:50%;object-fit:cover;border:5px solid white}
+.pill{background:#6a1b9a;color:white;padding:8px;border-radius:20px;text-align:center;font-weight:bold}
+button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+@media(max-width:900px){#layout{flex-direction:column}#sidebar{width:100%;display:flex}#main{flex-direction:column}#right{width:100%}}
+</style></head>
+<body>
+<div id="top"><div>🛡️ <b>SAN MATEO ATENCO</b> | Central de Alertamientos</div><div>🔔 <span id="contador">0</span> | <button onclick="location.reload()">↻</button></div></div>
+<div id="layout">
+<div id="sidebar"><b>TANIA<br>ANDREA</b><p style="font-size:11px">A GENERAL</p><div class="active">👤 Usuario</div><div>📋 Encuesta</div><div>🛎️ Servicios</div><div onclick="location.href='/'">🚪 Salir</div><div onclick="location.href='/registro'">➕ Nuevo Registro</div></div>
+<div id="main">
+<div id="left">
+<div class="card"><b>Últimos alertamientos:</b><table><thead><tr><th>Folio</th><th>Folio CAD</th><th>Nombres</th><th>Apellidos</th><th>Fecha y hora</th></tr></thead><tbody id="tabla"></tbody></table></div>
+<div class="card"><div id="map"></div><p style="font-size:12px"><b>📍 Última ubicación en vivo</b> - <span id="coords">Esperando alerta...</span> | <a href="#" id="gmaps" target="_blank">Abrir Google Maps</a></p></div>
+<div class="card"><b>Dirección:</b><div id="dirTxt">Selecciona un alertamiento de la tabla</div></div>
+<div class="card" style="background:#0b2a4a;color:white"><b>Adscripción: <span id="ads">-</span></b><br>Autoridad: <span id="autoridad">-</span><br>Tipo de delito: <span id="delito">-</span><br>Imputado: <span id="imputado">-</span> | Parentesco: <span id="parentesco">-</span><br>Características: <span id="caract">-</span></div>
+</div>
+<div id="right">
+<div class="pill">ULTIMO ALERTAMIENTO<br><span id="ultNombre">SIN ALERTAS</span><br><span id="ultFecha"></span></div>
+<div style="text-align:center;margin:12px"><img id="foto" src="https://i.pravatar.cc/300?img=47"><br><b id="rNombre">-</b></div>
+<div style="font-size:13px;line-height:1.7">
+<b>MAC:</b> <span id="rMac">-</span><br><b>Edad:</b> <span id="rEdad">-</span><br><b>Celular:</b> <span id="rCel">-</span><br><b>Otro:</b> <span id="rOtro">-</span><br><b>Hijos:</b> <span id="rHijos">-</span><br><b>Notas:</b> <span id="rNotas">-</span><br><b>Discapacidad:</b> <span id="rDisc">-</span><br><b>Inicio medida:</b> <span id="rInicio">-</span><br><b>Duración:</b> <span id="rDur">-</span><br><b>Fecha entrega pulsera:</b> <span id="rEntrega">-</span><br><b>Fecha fin:</b> <span id="rFin">-</span><br><b>Número carpeta:</b> <span id="rCarpeta">-</span><br><b>Status:</b> <span id="rStatus" style="color:#0f0">Activo</span><br><b>Atendido:</b> <span id="rAtendido">None</span>
+</div>
+<button onclick="atender()" style="width:100%;background:#0a0;color:white;margin-top:10px">✅ Marcar como Atendido</button>
+<button onclick="llamar()" style="width:100%;background:#0a5cad;color:white;margin-top:6px">📞 Llamar a usuaria</button>
+</div>
+</div>
+</div>
+<audio id="alarma" loop src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
+
+<script>
+const socket=io({transports:['websocket','polling']});
+let map=L.map('map').setView([19.2749,-99.5389],14);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+let marker=null, actual=null, count=0;
+if(Notification.permission!=='granted') Notification.requestPermission();
+function mostrar(d){
+  actual=d;
+  document.getElementById('ultNombre').innerText=(d.nombres||'')+' '+(d.apellidos||'');
+  document.getElementById('ultFecha').innerText=d.fecha||'';
+  document.getElementById('rNombre').innerText=(d.nombres||'')+' '+(d.apellidos||'');
+  document.getElementById('foto').src=d.foto||'https://i.pravatar.cc/300?img=47';
+  document.getElementById('rMac').innerText=d.mac||'-'; document.getElementById('rEdad').innerText=d.edad||'-';
+  document.getElementById('rCel').innerText=d.celular||'-'; document.getElementById('rOtro').innerText=d.otro||'-';
+  document.getElementById('rHijos').innerText=d.hijos??'-'; document.getElementById('rNotas').innerText=d.notas||'-';
+  document.getElementById('rDisc').innerText=d.discapacidad||'-'; document.getElementById('rInicio').innerText=d.inicio_medida||'-';
+  document.getElementById('rDur').innerText=d.duracion||'-'; document.getElementById('rEntrega').innerText=d.fecha_entrega||'-';
+  document.getElementById('rFin').innerText=d.fecha_fin||'-'; document.getElementById('rCarpeta').innerText=d.num_carpeta||'-';
+  document.getElementById('rStatus').innerText=d.status||'Activo';
+  document.getElementById('ads').innerText=d.adscripcion||'-'; document.getElementById('autoridad').innerText=d.autoridad||'-';
+  document.getElementById('delito').innerText=d.tipo_delito||'-'; document.getElementById('imputado').innerText=d.imputado||'-';
+  document.getElementById('parentesco').innerText=d.parentesco||'-'; document.getElementById('caract').innerText=d.caracteristicas||'-';
+  document.getElementById('dirTxt').innerHTML='Calle: '+(d.calle||'')+' Número: '+(d.numero||'')+'<br>Entre Calles: '+(d.entre_calles||'')+'<br>Referencia: '+(d.referencia||'')+'<br>Localidad: '+(d.localidad||'')+'<br>Municipio: '+(d.municipio||'')+'<br>Estado: '+(d.estado||'')+'<br>C.P.: '+(d.cp||'');
+  document.getElementById('coords').innerText=d.lat+', '+d.lng+' Prec '+(d.precision||0)+'m';
+  document.getElementById('gmaps').href='https://www.google.com/maps?q='+d.lat+','+d.lng;
+  if(marker) map.removeLayer(marker);
+  marker=L.marker([d.lat,d.lng]).addTo(map).bindPopup('<b>'+d.nombres+'</b><br>'+d.celular).openPopup();
+  map.setView([d.lat,d.lng],17);
+}
+socket.on('nueva_alerta', d=>{
+  count++; document.getElementById('contador').innerText=count;
+  document.getElementById('alarma').play().catch(()=>{});
+  if(Notification.permission==='granted') new Notification('PANICO '+(d.nombres||''),{body:(d.celular||'')+' - '+(d.fecha||'')});
+  let tr=document.createElement('tr');
+  tr.innerHTML='<td>'+d.folio+'</td><td>'+(d.folio_cad||'None')+'</td><td>'+d.nombres+'</td><td>'+d.apellidos+'</td><td>'+d.fecha+'</td>';
+  tr.onclick=()=>mostrar(d);
+  document.getElementById('tabla').prepend(tr);
+  mostrar(d);
+});
+socket.on('ubicacion_update', d=>{ if(marker && actual && d.folio===actual.folio){ marker.setLatLng([d.lat,d.lng]); document.getElementById('coords').innerText=d.lat+', '+d.lng+' - EN VIVO'; } });
+function atender(){ if(actual){ socket.emit('atender',{id:actual.id}); document.getElementById('rAtendido').innerText='Atendido'; document.getElementById('alarma').pause(); alert('Marcado como atendido'); } }
+function llamar(){ if(actual) window.location.href='tel:'+actual.celular; }
+fetch('/api/alertas').then(r=>r.json()).then(list=>{ list.reverse().forEach(d=>{ let tr=document.createElement('tr'); tr.innerHTML='<td>'+d.folio+'</td><td>'+(d.folio_cad||'None')+'</td><td>'+d.nombres+'</td><td>'+d.apellidos+'</td><td>'+d.fecha+'</td>'; tr.onclick=()=>mostrar(d); document.getElementById('tabla').appendChild(tr); }); if(list.length) mostrar(list[list.length-1]); });
+</script>
+
+</body></html>
