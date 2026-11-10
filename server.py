@@ -1,5 +1,5 @@
 from zoneinfo import ZoneInfo
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, render_template, session, redirect
 from flask_socketio import SocketIO, emit
 import sqlite3, datetime, uuid, os
 
@@ -7,6 +7,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'atenco-2026'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 DB = 'alertas.db'
+USUARIOS = {'admin': 'Atenco2026'}
 
 def db():
     c = sqlite3.connect(DB)
@@ -41,8 +42,36 @@ init()
 # SIN JINJA - sirve el HTML tal cual, por eso ya no da error de TemplateSyntaxError
 @app.route('/')
 def celular(): return send_from_directory('templates', 'celular.html')
+@app.route('/login', methods=['GET','POST'])
+def login_admin():
+    if request.method == 'POST':
+        u = request.form.get('usuario','')
+        p = request.form.get('password','')
+        if u in USUARIOS and USUARIOS[u] == p:
+            session['admin'] = u
+            return redirect('/dashboard')
+        return '<h2 style="text-align:center;margin-top:50px;font-family:sans-serif">❌ Usuario o contraseña incorrecta<br><br><a href="/login">Intentar otra vez</a></h2>'
+    return '''
+    <div style="max-width:350px;margin:80px auto;font-family:sans-serif;text-align:center;border:1px solid #ddd;padding:25px;border-radius:12px">
+    <h2>🚨 CENTRAL PANICO<br>ATENCO</h2>
+    <p>Inicia sesion para entrar al dashboard</p>
+    <form method="POST">
+    <input name="usuario" placeholder="Usuario" style="width:100%;padding:12px;margin:5px 0;border-radius:8px;border:1px solid #ccc"><br>
+    <input name="password" type="password" placeholder="Contraseña" style="width:100%;padding:12px;margin:5px 0;border-radius:8px;border:1px solid #ccc"><br>
+    <button style="width:100%;padding:12px;background:#cc0000;color:white;border:0;border-radius:8px;font-weight:bold;font-size:16px;margin-top:10px">ENTRAR</button>
+    </form></div>
+    '''
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/login')
+
 @app.route('/dashboard')
-def dashboard(): return send_from_directory('templates', 'dashboard.html')
+def dashboard():
+    if 'admin' not in session:
+        return redirect('/login')
+    return send_from_directory('templates', 'dashboard.html')
 @app.route('/registro')
 def registro(): return send_from_directory('templates', 'registro.html')
 @app.route('/static/<path:p>')
