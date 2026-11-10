@@ -53,7 +53,7 @@ def login_admin():
         return '<h2 style="text-align:center;margin-top:50px;font-family:sans-serif">❌ Usuario o contraseña incorrecta<br><br><a href="/login">Intentar otra vez</a></h2>'
     return '''
     <div style="max-width:350px;margin:80px auto;font-family:sans-serif;text-align:center;border:1px solid #ddd;padding:25px;border-radius:12px">
-    <h2>🚨 CENTRAL PANICO<br>XONACATLÁN</h2>
+    <h2>🚨 CENTRAL PANICO 🚨<br>XONACATLÁN</h2>
     <p>Inicia sesion para entrar al dashboard</p>
     <form method="POST">
     <input name="usuario" placeholder="Usuario" style="width:100%;padding:12px;margin:5px 0;border-radius:8px;border:1px solid #ccc"><br>
