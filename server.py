@@ -76,7 +76,7 @@ def api_buscar():
     if not folio:
         return jsonify({'ok': False, 'error': 'Escribe un folio'})
     c = db()
-    u = c.execute("SELECT * FROM usuarias WHERE folio=?", (folio,)).fetchone()
+    u = c.execute("SELECT * FROM usuarias WHERE UPPER(folio)=UPPER(?) OR celular=?", (folio, folio)).fetchone()
     c.close()
     if u:
         return jsonify({'ok': True, 'usuaria': dict(u)})
