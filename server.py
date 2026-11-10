@@ -66,7 +66,22 @@ def login_admin():
 def logout():
     session.clear()
     return redirect('/login')
+@app.route('/buscar')
+def buscar():
+    return send_from_directory('templates', 'buscar.html')
 
+@app.route('/api/buscar')
+def api_buscar():
+    folio = request.args.get('folio', '').strip()
+    if not folio:
+        return jsonify({'ok': False, 'error': 'Escribe un folio'})
+    c = db()
+    u = c.execute("SELECT * FROM usuarias WHERE folio=?", (folio,)).fetchone()
+    c.close()
+    if u:
+        return jsonify({'ok': True, 'usuaria': dict(u)})
+    return jsonify({'ok': False, 'error': 'Folio no encontrado'}), 404
+    
 @app.route('/dashboard')
 def dashboard():
     if 'admin' not in session:
