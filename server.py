@@ -4,7 +4,7 @@ import sqlite3, datetime, uuid, os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'atenco-2026'
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 DB = 'alertas.db'
 
 def db():
