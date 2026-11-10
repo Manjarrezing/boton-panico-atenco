@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Buscar por Folio</title>
+<style>
+body{font-family:Arial;background:#0b2a5b;color:white;padding:20px}
+.box{background:white;color:black;padding:20px;border-radius:10px;max-width:600px;margin:auto}
+input{width:65%;padding:10px;font-size:16px}
+button{padding:10px 15px;background:#0b2a5b;color:white;border:none;border-radius:5px}
+a{color:white}
+.foto{width:120px;height:120px;border-radius:50%;object-fit:cover}
+</style>
+</head>
+<body>
+<a href="/dashboard">← Volver a Central</a>
+<h2 style="text-align:center">Buscar por Folio</h2>
+<div class="box">
+<input id="folio" placeholder="Ejemplo: 7317-86B7">
+<button onclick="buscar()">Buscar</button>
+<div id="res"></div>
+</div>
+<script>
+async function buscar(){
+  let f = document.getElementById('folio').value.trim();
+  let r = document.getElementById('res');
+  if(!f){ r.innerHTML = 'Escribe un folio'; return; }
+  let res = await fetch('/api/buscar?folio=' + encodeURIComponent(f));
+  let j = await res.json();
+  if(!j.ok){ r.innerHTML = '<p style="color:red"><b>' + j.error + '</b></p>'; return; }
+  let u = j.usuaria;
+  r.innerHTML = `
+    <hr>
+    ${u.foto ? `<img class="foto" src="${u.foto}">` : ''}
+    <h3>${u.nombres || ''} ${u.apellidos || ''}</h3>
+    <p><b>Folio:</b> ${u.folio || ''}</p>
+    <p><b>Celular:</b> ${u.celular || ''}</p>
+    <p><b>Edad:</b> ${u.edad || ''}</p>
+    <p><b>Dirección:</b> ${u.calle || ''} ${u.numero || ''}, ${u.localidad || ''}</p>
+    <p><b>Adscripción:</b> ${u.adscripcion || ''}</p>
+    <p><b>Autoridad:</b> ${u.autoridad || ''}</p>
+    <p><b>Tipo de delito:</b> ${u.tipo_delito || ''}</p>
+    <p><b>Imputado:</b> ${u.imputado || ''}</p>
+    <p><b>Parentesco:</b> ${u.parentesco || ''}</p>
+    <p><b>Características:</b> ${u.caracteristicas || ''}</p>
+    <p><b>Número carpeta:</b> ${u.numero_carpeta || ''}</p>
+  `;
+}
+</script>
+</body>
+</html>
