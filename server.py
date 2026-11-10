@@ -83,7 +83,7 @@ def alertas():
 
 @socketio.on('panico')
 def on_panico(data):
-    fecha=datetime.now(ZoneInfo("America/Mexico_City")).strftime("%d-%m-%Y %H:%M:%S")
+    fecha=datetime.datetime.now(ZoneInfo("America/Mexico_City")).strftime("%Y-%m-%d %H:%M:%S")
     c=db(); cur=c.cursor()
     cur.execute("INSERT INTO alertas (folio,lat,lng,precision,fecha,tipo,mensaje) VALUES (?,?,?,?,?,?,?)",(data.get('folio'),data.get('lat'),data.get('lng'),data.get('precision',0),fecha,data.get('tipo','PANICO'),data.get('mensaje','')))
     nid=cur.lastrowid; c.commit()
