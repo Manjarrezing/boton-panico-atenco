@@ -1,8 +1,5 @@
-flask==3.0.3
-flask-socketio==5.3.6
-flask-sqlalchemy==3.1.1
-requests==2.31.0
-gunicorn==22.0.0
-psycopg2-binary==2.9.9
-gevent==24.2.1
-gevent-websocket==0.10.1
+Flask==3.0.3
+Flask-SocketIO==5.3.6
+python-socketio==5.11.0
+gunicorn==21.2.0
+eventlet==0.33.3
