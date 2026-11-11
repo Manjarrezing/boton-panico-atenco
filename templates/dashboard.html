@@ -168,7 +168,7 @@ async function guardarEditar(){
       aviso.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:15px 25px; border-radius:10px; font-size:18px; z-index:99999;';
       document.body.appendChild(aviso);
       setTimeout(function(){ location.reload(); }, 1200);
-    } else { alert('No se pudo guardar'); }
+   } else { alert('Error del servidor: ' + await r.text()); }
   }catch(e){ alert('Error de conexión'); }
 }
 </script>
