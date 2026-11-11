@@ -110,11 +110,11 @@ function abrirEditar(datos){
   }
 }
 
+function v(id){ let e=document.getElementById(id); return e ? e.value : ""; }
+
 async function guardarEditar(){
-  const folio = document.getElementById('edit_folio').value;
-  // Si hay foto nueva, convertirla a texto, si no, dejar la que ya estaba
   let fotoFinal = window.fotoActual || "";
-  const fileInput = document.getElementById('edit_foto');
+  const fileInput = document.getElementById('m_foto');
   if(fileInput && fileInput.files && fileInput.files[0]){
     fotoFinal = await new Promise((res)=>{
       const r = new FileReader();
@@ -123,37 +123,38 @@ async function guardarEditar(){
     });
   }
   const d = {
-    folio: folio,
-    nombres: document.getElementById('edit_nombres').value,
-    apellidos: document.getElementById('edit_apellidos').value,
-    mac: document.getElementById('edit_mac').value,
-    edad: document.getElementById('edit_edad').value,
-    nac: document.getElementById('edit_nac').value,
-    celular: document.getElementById('edit_celular').value,
-    otro: document.getElementById('edit_otro').value,
-    hijos: document.getElementById('edit_hijos').value,
-    calle: document.getElementById('edit_calle').value,
-    numero: document.getElementById('edit_numero').value,
-    entrecalles: document.getElementById('edit_entrecalles').value,
-    referencia: document.getElementById('edit_referencia').value,
-    localidad: document.getElementById('edit_localidad').value,
-    cp: document.getElementById('edit_cp').value,
-    carpeta: document.getElementById('edit_carpeta').value,
-    imputado: document.getElementById('edit_imputado').value,
-    adscripcion: document.getElementById('edit_adscripcion').value,
-    autoridad: document.getElementById('edit_autoridad').value,
-    tipo_delito: document.getElementById('edit_tipo_delito').value,
-    parentesco: document.getElementById('edit_parentesco').value,
-    permanencia: document.getElementById('edit_permanencia').value,
-    caracteristicas: document.getElementById('edit_caracteristicas').value,
-    discapacidad: document.getElementById('edit_discapacidad').value,
-    inicio: document.getElementById('edit_inicio').value,
-    duracion: document.getElementById('edit_duracion').value,
-    fecha_entrega: document.getElementById('edit_fecha_entrega').value,
-    fecha_fin: document.getElementById('edit_fecha_fin').value,
-    notas: document.getElementById('edit_notas').value,
+    folio: v('m_folio'),
+    nombres: v('m_nombres'),
+    apellidos: v('m_apellidos'),
+    mac: v('m_mac'),
+    edad: v('m_edad'),
+    nac: v('m_nac'),
+    celular: v('m_celular'),
+    otro: v('m_otro'),
+    hijos: v('m_hijos'),
+    calle: v('m_calle'),
+    numero: v('m_numero'),
+    entrecalles: v('m_entrecalles'),
+    referencia: v('m_referencia'),
+    localidad: v('m_localidad'),
+    cp: v('m_cp'),
+    carpeta: v('m_carpeta'),
+    imputado: v('m_imputado'),
+    adscripcion: v('m_adscripcion'),
+    autoridad: v('m_autoridad'),
+    tipo_delito: v('m_tipo_delito'),
+    parentesco: v('m_parentesco'),
+    permanencia: v('m_permanencia'),
+    caracteristicas: v('m_caracteristicas'),
+    discapacidad: v('m_discapacidad'),
+    inicio: v('m_inicio') || v('m_inicio_medida'),
+    duracion: v('m_duracion'),
+    fecha_entrega: v('m_fecha_entrega'),
+    fecha_fin: v('m_fecha_fin'),
+    notas: v('m_notas'),
     foto: fotoFinal
   };
+  console.log("Guardando", d);
   const r = await fetch('/api/actualizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
   const res = await r.json();
   if(res.ok){ alert('✅ Guardado'); location.reload(); }
