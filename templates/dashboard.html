@@ -100,34 +100,41 @@ function cerrarEditar(){ document.getElementById('modalEditar').style.display='n
 
 function abrirEditar(datos){
   document.getElementById('modalEditar').style.display='block';
-  // Si no le mandaron datos, buscarlos donde ya están en la página
-  if(!datos || (typeof datos === 'object' && Object.keys(datos).length === 0)){
-    datos = window.personaActual || window.datosActual || window.ultima || window.currentPersona || null;
-  }
-  if(datos){ llenarEditar(datos); return; }
-  // Si no hay variable global, buscar por folio que está en pantalla
-  var folioEl = document.getElementById('ultFolio') || document.getElementById('folio') || document.querySelector('[id*="Folio"]');
-  var folio = folioEl ? folioEl.textContent.trim() : '';
-  if(folio){
-    // Intentar traerla del servidor
-    fetch('/api/persona/' + folio).then(r=>r.json()).then(d=>{ if(d && d.folio) llenarEditar(d); }).catch(()=>{});
-    fetch('/api/ultima').then(r=>r.json()).then(d=>{ if(d && (d.folio || d.nombres)) llenarEditar(d); }).catch(()=>{});
-  }
-  // Mientras tanto, llenar con lo que se ve en la tarjeta
+  if(datos && Object.keys(datos).length>0){ llenarEditar(datos); return; }
+  // Buscar en TODOS los lugares posibles donde el dashboard carga los datos
+  var urls = ['/api/alertas','/alertas','/api/personas','/api/datos','/api/ultima','/datos','/api/ultima_alerta'];
+  var listo = false;
+  urls.forEach(function(u){
+    fetch(u).then(r=>r.json()).then(function(d){
+      if(listo) return;
+      var lista = Array.isArray(d) ? d : (d.alertas || d.personas || d.datos || d.data || [d]);
+      if(!lista || !lista.length) return;
+      // Si hay varias, agarrar la última, que es la que se ve en pantalla
+      var p = lista[lista.length-1];
+      if(p && (p.nombres || p.nombre || p.folio)){
+        listo = true;
+        window.personaActual = p;
+        llenarEditar(p);
+      }
+    }).catch(()=>{});
+  });
+  // Respaldo: si a los 1.5 seg no llegó nada, avisar qué falta
   setTimeout(function(){
-    var d2 = {};
-    var mapaDom = {folio:'ultFolio', nombres:'ultNombre', apellidos:'ultApellidos', mac:'ultMAC', edad:'ultEdad', celular:'ultCelular', calle:'ultCalle'};
-    for(var k in mapaDom){
-      var el = document.getElementById(mapaDom[k]);
-      if(el) d2[k] = el.textContent.trim();
+    if(!listo){
+      var f = document.getElementById('m_folio');
+      if(f && !f.value){
+        alert('No pude traer los datos solos. Escribe el Folio a mano arriba y dale Guardar, con eso ya se va a actualizar.');
+      }
     }
-    if(d2.nombres) llenarEditar(d2);
-  }, 300);
+  }, 1500);
 }
 
 function llenarEditar(datos){
   if(typeof datos === 'string'){ try{ datos = JSON.parse(datos); }catch(e){} }
   window.fotoActual = datos.foto || "";
+  // Mapeo por si el servidor usa otros nombres
+  var alias = {nombre:'nombres', nombre_completo:'nombres', apellidos:'apellidos', telefono:'celular', cel:'celular', direccion:'calle', domicilio:'calle'};
+  for(var k in alias){ if(datos[k] && !datos[alias[k]]) datos[alias[k]] = datos[k]; }
   for(var k in datos){
     var el = document.getElementById('m_'+k);
     if(el) el.value = datos[k] || '';
@@ -136,9 +143,10 @@ function llenarEditar(datos){
     var img = document.getElementById('m_foto_actual');
     if(img){ img.src = datos.foto; img.style.display='block'; }
   }
+  // Esto es lo clave: que el folio NO quede vacío para que Guardar sí actualice
+  var folioEl = document.getElementById('m_folio');
+  if(folioEl && !folioEl.value && datos.folio) folioEl.value = datos.folio;
 }
-function v(id){ let e=document.getElementById(id); return e ? e.value : ""; }
-
 async function guardarEditar(){
   let fotoFinal = window.fotoActual || "";
   const fileInput = document.getElementById('m_foto');
