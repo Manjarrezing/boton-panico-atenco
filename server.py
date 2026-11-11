@@ -158,6 +158,15 @@ def on_atender(data):
 def api_actualizar():
     try:
         d = request.get_json()
+        # Si edad o hijos vienen vacios, mandarlos como None y no como ""
+        for k in ['edad','hijos']:
+            if d.get(k) == '' or d.get(k) is None:
+                d[k] = None
+            else:
+                try:
+                    d[k] = int(float(str(d[k]).strip()))
+                except:
+                    d[k] = None
         conn = db(); c = cur(conn)
         # Crear columnas si no existen
         cols = ['nombres','apellidos','mac','edad','nac','celular','otro','hijos','calle','numero','entrecalles','referencia','localidad','cp','carpeta','imputado','adscripcion','autoridad','tipo_delito','parentesco','permanencia','caracteristicas','discapacidad','inicio_medida','duracion','fecha_entrega','fecha_fin','notas','foto']
