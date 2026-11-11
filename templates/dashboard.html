@@ -57,42 +57,40 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 <button onclick="llamar()" style="width:100%;background:#0a5cad;color:white;margin-top:6px">📞 Llamar a usuaria</button>
  <button onclick="abrirEditar()" style="width:100%;background:#FFC107;color:black;margin-top:6px;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;">✏️ Editar datos vacíos</button>
 
-<div id="modalEditar" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; overflow:auto;">
+  <div id="modalEditar" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; overflow:auto;">
   <div style="background:white; max-width:700px; margin:20px auto; padding:20px; border-radius:12px;">
-    <h3>Editar datos</h3>
-    <label>Folio</label><input id="m_folio" style="width:100%">
-    <label>Nombres</label><input id="m_nombres" style="width:100%">
-    <label>Apellidos</label><input id="m_apellidos" style="width:100%">
-    <label>MAC</label><input id="m_mac" style="width:100%">
-    <label>Edad</label><input id="m_edad" style="width:100%">
-    <label>NAC / Fecha nacimiento</label><input id="m_nac" type="date" style="width:100%">
-    <label>Celular</label><input id="m_celular" style="width:100%">
-    <label>Otro teléfono</label><input id="m_otro" style="width:100%">
-    <label>Hijos</label><input id="m_hijos" style="width:100%">
-    <label>Calle</label><input id="m_calle" style="width:100%">
-    <label>Número</label><input id="m_numero" style="width:100%">
-    <label>Entre calles</label><input id="m_entrecalles" style="width:100%">
-    <label>Referencia</label><input id="m_referencia" style="width:100%">
-    <label>Localidad</label><input id="m_localidad" style="width:100%">
-    <label>C.P.</label><input id="m_cp" style="width:100%">
-    <label>Número de carpeta</label><input id="m_carpeta" style="width:100%">
-    <label>Imputado</label><input id="m_imputado" style="width:100%">
-    <label>Adscripción</label><input id="m_adscripcion" style="width:100%">
-    <label>Autoridad</label><input id="m_autoridad" style="width:100%">
-    <label>Tipo de delito</label><input id="m_tipo_delito" style="width:100%">
-    <label>Parentesco</label><input id="m_parentesco" style="width:100%">
-    <label>Permanencia</label><input id="m_permanencia" style="width:100%">
-    <label>Características del imputado</label><input id="m_caracteristicas" style="width:100%">
-    <label>Discapacidad</label><input id="m_discapacidad" style="width:100%">
-    <label>Inicio medida</label><input id="m_inicio" type="date" style="width:100%">
-    <label>Duración</label><input id="m_duracion" style="width:100%">
-    <label>Fecha entrega pulsera</label><input id="m_entrega" type="date" style="width:100%">
-    <label>Fecha fin</label><input id="m_fin" type="date" style="width:100%">
-    <label>Notas</label><textarea id="m_notas" style="width:100%"></textarea>
-    <label>Foto de la persona</label><br>
-    <img id="m_foto_actual" style="width:100px; height:100px; object-fit:cover; border-radius:50%; display:none;">
-    <input id="m_foto" type="file" accept="image/*" style="width:100%">
-    <br><br>
+    <h3 style="color:#111;">Editar datos</h3>
+    <div><b style="color:#111;">Folio</b><br><input id="m_folio" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Nombres</b><br><input id="m_nombres" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Apellidos</b><br><input id="m_apellidos" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">MAC</b><br><input id="m_mac" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Edad</b><br><input id="m_edad" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">NAC / Fecha nacimiento</b><br><input id="m_nac" type="date" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Celular</b><br><input id="m_celular" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Otro teléfono</b><br><input id="m_otro" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Hijos</b><br><input id="m_hijos" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Calle</b><br><input id="m_calle" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Número</b><br><input id="m_numero" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Entre calles</b><br><input id="m_entrecalles" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Referencia</b><br><input id="m_referencia" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Localidad</b><br><input id="m_localidad" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">C.P.</b><br><input id="m_cp" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Número de carpeta</b><br><input id="m_carpeta" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Imputado</b><br><input id="m_imputado" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Adscripción</b><br><input id="m_adscripcion" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Autoridad</b><br><input id="m_autoridad" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Tipo de delito</b><br><input id="m_tipo_delito" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Parentesco</b><br><input id="m_parentesco" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Permanencia</b><br><input id="m_permanencia" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Características del imputado</b><br><input id="m_caracteristicas" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Discapacidad</b><br><input id="m_discapacidad" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Inicio medida</b><br><input id="m_inicio" type="date" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Duración</b><br><input id="m_duracion" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Fecha entrega pulsera</b><br><input id="m_entrega" type="date" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Fecha fin</b><br><input id="m_fin" type="date" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Notas</b><br><textarea id="m_notas" style="width:100%; padding:8px;"></textarea></div>
+    <div><b style="color:#111;">Foto de la persona</b><br><img id="m_foto_actual" style="width:100px; height:100px; object-fit:cover; border-radius:50%; display:none;"><input id="m_foto" type="file" accept="image/*" style="width:100%;"></div>
+    <br>
     <button onclick="guardarEditar()" style="background:#22c55e; color:white; padding:12px; width:100%; border:none; border-radius:8px; font-size:16px;">Guardar todo</button>
     <button onclick="cerrarEditar()" style="background:#ccc; padding:10px; width:100%; border:none; border-radius:8px; margin-top:8px;">Cancelar</button>
   </div>
