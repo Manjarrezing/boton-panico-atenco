@@ -26,7 +26,7 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 <body>
 <div id="top"><div>🛡️ <b>XONACTLÁN</b> | Central de Alertamientos</div><div>🔔 <span id="contador">0</span> | <button onclick="location.reload()">↻</button></div></div>
 <div id="layout">
-<div id="sidebar"><b>TANIA<br>ANDREA</b><p style="font-size:11px">A GENERAL</p><div class="active">👤 Usuario</div><div onclick="location.href='/buscar'">🔍 Buscar</div><div>📋 Encuesta</div><div>🛎️ Servicios</div><div onclick="location.href='/'">🚪 Salir</div><div onclick="location.href='/registro'">➕ Nuevo Registro</div></div>
+<div id="sidebar"><b>TANIA<br>ANDREA</b><p style="font-size:11px">A GENERAL</p><div class="active">👤 Usuario</div><div onclick="location.href='/buscar'">🔍 Buscar</div><div>📋 Encuesta</div><div>🛎️ Servicios</div><div onclick="salir()">🚪 Salir</div><div onclick="location.href='/registro'">➕ Nuevo Registro</div></div>
 <div id="main">
 <div id="left">
 <div class="card"><b>Últimos alertamientos:</b><table><thead><tr><th>Folio</th><th>Folio CAD</th><th>Nombres</th><th>Apellidos</th><th>Fecha y hora</th></tr></thead><tbody id="tabla"></tbody></table></div>
@@ -48,6 +48,11 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 <audio id="alarma" loop src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
 
 <script>
+function salir(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href='/login';
+} 
 const socket=io({transports:['websocket','polling']});
 let map=L.map('map').setView([19.2749,-99.5389],14);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
