@@ -154,6 +154,13 @@ def on_atender(data):
     c.execute("UPDATE alertas SET estado='ATENDIDA' WHERE id=%s", (data.get('id'),))
     conn.commit(); conn.close()
     emit('alerta_atendida', data, broadcast=True)
-
+@app.route('/api/actualizar', methods=['POST'])
+def api_actualizar():
+    d = request.get_json()
+    conn = db(); c = cur(conn)
+    c.execute("UPDATE usuarias SET nac=%s, otro=%s, hijos=%s, notas=%s, discapacidad=%s, inicio=%s, duracion=%s, fecha_entrega=%s, fecha_fin=%s WHERE folio=%s",
+      (d.get('nac'), d.get('otro'), d.get('hijos'), d.get('notas'), d.get('discapacidad'), d.get('inicio'), d.get('duracion'), d.get('fecha_entrega'), d.get('fecha_fin'), d.get('folio')))
+    conn.commit(); conn.close()
+    return jsonify({"ok": True, "mensaje": "Actualizado"})
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
