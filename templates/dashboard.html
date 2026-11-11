@@ -148,6 +148,7 @@ function llenarEditar(datos){
   if(folioEl && !folioEl.value && datos.folio) folioEl.value = datos.folio;
 }
 async function guardarEditar(){
+  alert('SI ENTRA AL BOTON');
   let fotoFinal = window.fotoActual || "";
   const fileInput = document.getElementById('m_foto');
   if(fileInput && fileInput.files && fileInput.files[0]){
