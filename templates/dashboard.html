@@ -57,78 +57,121 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 <button onclick="llamar()" style="width:100%;background:#0a5cad;color:white;margin-top:6px">📞 Llamar a usuaria</button>
  <button onclick="abrirEditar()" style="width:100%;background:#FFC107;color:black;margin-top:6px;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;">✏️ Editar datos vacíos</button>
 
-<div id="modalEditar" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;justify-content:center;align-items:center;">
-  <div style="background:white;color:black;width:90%;max-width:450px;max-height:90%;overflow:auto;padding:20px;border-radius:15px;">
-    <h3 style="margin-top:0;">✏️ Editar datos</h3>
-    <label>Folio</label>
-    <input id="m_folio" style="width:100%;padding:8px;margin-bottom:8px;" placeholder="Ej: 1540-1C62">
-    <label>NAC / Fecha nacimiento</label>
-    <input id="m_nac" type="date" style="width:100%;padding:8px;margin-bottom:8px;">
-    <label>Otro teléfono</label>
-    <input id="m_otro" style="width:100%;padding:8px;margin-bottom:8px;">
-    <label>Hijos</label>
-    <input id="m_hijos" style="width:100%;padding:8px;margin-bottom:8px;">
-    <label>Notas</label>
-    <input id="m_notas" style="width:100%;padding:8px;margin-bottom:8px;">
-    <label>Discapacidad</label>
-    <input id="m_discapacidad" style="width:100%;padding:8px;margin-bottom:8px;">
-    <label>Inicio medida</label>
-    <input id="m_inicio" type="date" style="width:100%;padding:8px;margin-bottom:8px;">
-    <label>Duración</label>
-    <input id="m_duracion" style="width:100%;padding:8px;margin-bottom:8px;">
-    <label>Fecha entrega pulsera</label>
-    <input id="m_entrega" type="date" style="width:100%;padding:8px;margin-bottom:8px;">
-    <label>Fecha fin</label>
-    <input id="m_fin" type="date" style="width:100%;padding:8px;margin-bottom:8px;">
-    <button onclick="guardarEditar()" style="width:100%;padding:12px;background:#28A745;color:white;border:none;border-radius:10px;font-weight:bold;margin-top:5px;">💾 Guardar todo</button>
-    <button onclick="cerrarEditar()" style="width:100%;padding:12px;background:#ccc;border:none;border-radius:10px;font-weight:bold;margin-top:8px;">Cancelar</button>
+<div id="modalEditar" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; overflow:auto;">
+  <div style="background:white; max-width:700px; margin:20px auto; padding:20px; border-radius:12px;">
+    <h3>Editar datos</h3>
+    <label>Folio</label><input id="m_folio" style="width:100%">
+    <label>Nombres</label><input id="m_nombres" style="width:100%">
+    <label>Apellidos</label><input id="m_apellidos" style="width:100%">
+    <label>MAC</label><input id="m_mac" style="width:100%">
+    <label>Edad</label><input id="m_edad" style="width:100%">
+    <label>NAC / Fecha nacimiento</label><input id="m_nac" type="date" style="width:100%">
+    <label>Celular</label><input id="m_celular" style="width:100%">
+    <label>Otro teléfono</label><input id="m_otro" style="width:100%">
+    <label>Hijos</label><input id="m_hijos" style="width:100%">
+    <label>Calle</label><input id="m_calle" style="width:100%">
+    <label>Número</label><input id="m_numero" style="width:100%">
+    <label>Entre calles</label><input id="m_entrecalles" style="width:100%">
+    <label>Referencia</label><input id="m_referencia" style="width:100%">
+    <label>Localidad</label><input id="m_localidad" style="width:100%">
+    <label>C.P.</label><input id="m_cp" style="width:100%">
+    <label>Número de carpeta</label><input id="m_carpeta" style="width:100%">
+    <label>Imputado</label><input id="m_imputado" style="width:100%">
+    <label>Adscripción</label><input id="m_adscripcion" style="width:100%">
+    <label>Autoridad</label><input id="m_autoridad" style="width:100%">
+    <label>Tipo de delito</label><input id="m_tipo_delito" style="width:100%">
+    <label>Parentesco</label><input id="m_parentesco" style="width:100%">
+    <label>Permanencia</label><input id="m_permanencia" style="width:100%">
+    <label>Características del imputado</label><input id="m_caracteristicas" style="width:100%">
+    <label>Discapacidad</label><input id="m_discapacidad" style="width:100%">
+    <label>Inicio medida</label><input id="m_inicio" type="date" style="width:100%">
+    <label>Duración</label><input id="m_duracion" style="width:100%">
+    <label>Fecha entrega pulsera</label><input id="m_entrega" type="date" style="width:100%">
+    <label>Fecha fin</label><input id="m_fin" type="date" style="width:100%">
+    <label>Notas</label><textarea id="m_notas" style="width:100%"></textarea>
+    <label>Foto de la persona</label><br>
+    <img id="m_foto_actual" style="width:100px; height:100px; object-fit:cover; border-radius:50%; display:none;">
+    <input id="m_foto" type="file" accept="image/*" style="width:100%">
+    <br><br>
+    <button onclick="guardarEditar()" style="background:#22c55e; color:white; padding:12px; width:100%; border:none; border-radius:8px; font-size:16px;">Guardar todo</button>
+    <button onclick="cerrarEditar()" style="background:#ccc; padding:10px; width:100%; border:none; border-radius:8px; margin-top:8px;">Cancelar</button>
   </div>
 </div>
-
 <script>
-function abrirEditar(){
-  document.getElementById('modalEditar').style.display = 'flex';
-  var f = document.getElementById('rFolio') ? document.getElementById('rFolio').innerText : '';
-  if(f && f != '-') document.getElementById('m_folio').value = f;
+function cerrarEditar(){ document.getElementById('modalEditar').style.display='none'; }
+
+function abrirEditar(datos){
+  document.getElementById('modalEditar').style.display='block';
+  for(var k in datos){
+    var el = document.getElementById('m_'+k);
+    if(el) el.value = datos[k] || '';
+  }
+  if(datos.foto){
+    var img = document.getElementById('m_foto_actual');
+    img.src = datos.foto; img.style.display='block';
+  }
 }
-function cerrarEditar(){
-  document.getElementById('modalEditar').style.display = 'none';
-}
+
 async function guardarEditar(){
+  var fotoInput = document.getElementById('m_foto');
+  var fotoBase64 = '';
+  if(fotoInput.files && fotoInput.files[0]){
+    fotoBase64 = await new Promise(function(res){
+      var r = new FileReader();
+      r.onload = function(){ res(r.result); };
+      r.readAsDataURL(fotoInput.files[0]);
+    });
+  }
   var datos = {
     folio: document.getElementById('m_folio').value,
+    nombres: document.getElementById('m_nombres').value,
+    apellidos: document.getElementById('m_apellidos').value,
+    mac: document.getElementById('m_mac').value,
+    edad: document.getElementById('m_edad').value,
     nac: document.getElementById('m_nac').value,
+    celular: document.getElementById('m_celular').value,
     otro: document.getElementById('m_otro').value,
     hijos: document.getElementById('m_hijos').value,
-    notas: document.getElementById('m_notas').value,
+    calle: document.getElementById('m_calle').value,
+    numero: document.getElementById('m_numero').value,
+    entrecalles: document.getElementById('m_entrecalles').value,
+    referencia: document.getElementById('m_referencia').value,
+    localidad: document.getElementById('m_localidad').value,
+    cp: document.getElementById('m_cp').value,
+    carpeta: document.getElementById('m_carpeta').value,
+    imputado: document.getElementById('m_imputado').value,
+    adscripcion: document.getElementById('m_adscripcion').value,
+    autoridad: document.getElementById('m_autoridad').value,
+    tipo_delito: document.getElementById('m_tipo_delito').value,
+    parentesco: document.getElementById('m_parentesco').value,
+    permanencia: document.getElementById('m_permanencia').value,
+    caracteristicas: document.getElementById('m_caracteristicas').value,
     discapacidad: document.getElementById('m_discapacidad').value,
     inicio: document.getElementById('m_inicio').value,
     duracion: document.getElementById('m_duracion').value,
     fecha_entrega: document.getElementById('m_entrega').value,
-    fecha_fin: document.getElementById('m_fin').value
+    fecha_fin: document.getElementById('m_fin').value,
+    notas: document.getElementById('m_notas').value,
+    foto: fotoBase64
   };
   if(!datos.folio){
-  var aviso2 = document.createElement('div');
-  aviso2.textContent = '⚠️ Falta el folio';
-  aviso2.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#ef4444; color:white; padding:15px 25px; border-radius:10px; font-size:18px; z-index:9999; box-shadow:0 4px 10px rgba(0,0,0,0.3)';
-  document.body.appendChild(aviso2);
-  setTimeout(function(){ aviso2.remove(); }, 2000);
-  return;
-}
+    var aviso2 = document.createElement('div');
+    aviso2.textContent = '⚠️ Falta el folio';
+    aviso2.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#ef4444; color:white; padding:15px 25px; border-radius:10px; font-size:18px; z-index:99999;';
+    document.body.appendChild(aviso2);
+    setTimeout(function(){ aviso2.remove(); }, 2000);
+    return;
+  }
   try{
     var r = await fetch('/api/actualizar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(datos)});
     if(r.ok){
       var aviso = document.createElement('div');
       aviso.textContent = '✅ Guardado';
-      aviso.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:15px 25px; border-radius:10px; font-size:18px; z-index:9999; box-shadow:0 4px 10px rgba(0,0,0,0.3)';
+      aviso.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:15px 25px; border-radius:10px; font-size:18px; z-index:99999;';
       document.body.appendChild(aviso);
       setTimeout(function(){ location.reload(); }, 1200);
-    } else {
-      alert('No se pudo guardar, intenta de nuevo');
-    }
-  }catch(e){
-    alert('Error de conexión, intenta de nuevo');
-  }
+    } else { alert('No se pudo guardar'); }
+  }catch(e){ alert('Error de conexión'); }
 }
 </script>
 </div>
