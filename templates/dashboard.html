@@ -107,7 +107,14 @@ async function guardarEditar(){
     fecha_entrega: document.getElementById('m_entrega').value,
     fecha_fin: document.getElementById('m_fin').value
   };
-  if(!datos.folio){ alert('Pon el folio'); return; }
+  if(!datos.folio){
+  var aviso2 = document.createElement('div');
+  aviso2.textContent = '⚠️ Falta el folio';
+  aviso2.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#ef4444; color:white; padding:15px 25px; border-radius:10px; font-size:18px; z-index:9999; box-shadow:0 4px 10px rgba(0,0,0,0.3)';
+  document.body.appendChild(aviso2);
+  setTimeout(function(){ aviso2.remove(); }, 2000);
+  return;
+}
   try{
     var r = await fetch('/api/actualizar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(datos)});
     if(r.ok){
