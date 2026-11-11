@@ -148,61 +148,22 @@ function llenarEditar(datos){
   if(folioEl && !folioEl.value && datos.folio) folioEl.value = datos.folio;
 }
 async function guardarEditar(){
-  alert('SI ENTRA AL BOTON');
-  let fotoFinal = window.fotoActual || "";
-  const fileInput = document.getElementById('m_foto');
-  if(fileInput && fileInput.files && fileInput.files[0]){
-    fotoFinal = await new Promise((res)=>{
-      const r = new FileReader();
-      r.onload = ()=> res(r.result);
-      r.readAsDataURL(fileInput.files[0]);
+  try{
+    alert('Guardando...');
+    var datos = {};
+    document.querySelectorAll('[id^="m_"]').forEach(function(el){
+      if(el.type === 'file') return;
+      datos[el.id.replace('m_','')] = el.value;
     });
+    if(window.fotoActual) datos.foto = window.fotoActual;
+    if(!datos.folio){ alert('Falta el Folio'); return; }
+    var r = await fetch('/api/actualizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
+    var txt = await r.text();
+    if(r.ok){ alert('✅ Guardado'); location.reload(); }
+    else { alert('Error del servidor: ' + txt); }
+  }catch(e){
+    alert('Error adentro: ' + e);
   }
-  const d = {
-    folio: v('m_folio'),
-    nombres: v('m_nombres'),
-    apellidos: v('m_apellidos'),
-    mac: v('m_mac'),
-    edad: v('m_edad'),
-    nac: v('m_nac'),
-    celular: v('m_celular'),
-    otro: v('m_otro'),
-    hijos: v('m_hijos'),
-    calle: v('m_calle'),
-    numero: v('m_numero'),
-    entrecalles: v('m_entrecalles'),
-    referencia: v('m_referencia'),
-    localidad: v('m_localidad'),
-    cp: v('m_cp'),
-    carpeta: v('m_carpeta'),
-    imputado: v('m_imputado'),
-    adscripcion: v('m_adscripcion'),
-    autoridad: v('m_autoridad'),
-    tipo_delito: v('m_tipo_delito'),
-    parentesco: v('m_parentesco'),
-    permanencia: v('m_permanencia'),
-    caracteristicas: v('m_caracteristicas'),
-    discapacidad: v('m_discapacidad'),
-    inicio: v('m_inicio') || v('m_inicio_medida'),
-    duracion: v('m_duracion'),
-    fecha_entrega: v('m_fecha_entrega'),
-    fecha_fin: v('m_fecha_fin'),
-    notas: v('m_notas'),
-    foto: fotoFinal
-  };
-  console.log("Guardando", d);
-try{
-  const r = await fetch('/api/actualizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-  const txt = await r.text();
-  console.log("Respuesta servidor:", txt);
-  let res = {};
-  try{ res = JSON.parse(txt); }catch(e){ res = {ok:r.ok, mensaje:txt}; }
-  if(r.ok){ alert('✅ Guardado'); location.reload(); }
-  else { alert("Error del servidor: " + (res.mensaje || txt)); }
-}catch(e){
-  alert("Error al guardar: " + e);
-  console.log("Error guardar:", e);
-}
 }
 </script>
 </div>
