@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Buscar por Folio</title>
-<style>body{background:#0a2a6b;color:white;font-family:sans-serif;margin:0;padding:20px}input{padding:12px;border-radius:8px;border:0;width:70%;max-width:400px}button{padding:12px 18px;border-radius:8px;border:0;background:#fff;font-weight:bold;cursor:pointer}.card{background:white;color:#222;border-radius:12px;padding:15px;margin:10px 0}a{color:white}</style>
+<style>body{background:#0a2a6b;color:white;font-family:sans-serif;margin:0;padding:20px}input{padding:12px;border-radius:8px;border:0;width:70%;max-width:400px}button{padding:12px 18px;border-radius:8px;border:0;background:#fff;font-weight:bold;cursor:pointer}.card{background:white;color:#222;border-radius:12px;padding:15px;margin:10px 0;display:flex;gap:15px;align-items:center}a{color:white}img{width:90px;height:90px;object-fit:cover;border-radius:10px;border:2px solid #0a2a6b}</style>
 </head><body>
 <a href="/dashboard">← Volver a Central</a>
 <h1 style="text-align:center">Buscar por Folio</h1>
@@ -12,13 +12,22 @@
 <div id="lista"></div>
 <script>
 let todas=[];
+function fotoHTML(u){
+  let f = u.foto_url || u.foto || u.foto_base64 || u.imagen || u.foto_path || '';
+  if(!f) return '<div style="width:90px;height:90px;background:#ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:30px">👤</div>';
+  if(!f.startsWith('http') && !f.startsWith('data:') && !f.startsWith('/')) f = 'data:image/jpeg;base64,'+f;
+  return `<img src="${f}">`;
+}
+function cardHTML(u){
+  return `<div class="card">${fotoHTML(u)}<div style="text-align:left"><b>${u.folio} - ${u.nombres||''} ${u.apellidos||''}</b><br>Cel: ${u.celular||''} | Edad: ${u.edad||''}<br>${u.calle||''} ${u.numero||''} ${u.municipio||''}</div></div>`;
+}
 async function cargar(){
   let r=await fetch('/api/usuarias'); todas=await r.json();
   mostrar(todas);
 }
 function mostrar(arr){
   if(!arr.length){document.getElementById('lista').innerHTML='<p>No hay folios todavia</p>';return}
-  document.getElementById('lista').innerHTML=arr.map(u=>`<div class="card"><b>${u.folio} - ${u.nombres||''} ${u.apellidos||''}</b><br>Cel: ${u.celular||''} | Edad: ${u.edad||''}<br>${u.calle||''} ${u.numero||''} ${u.municipio||''}</div>`).join('');
+  document.getElementById('lista').innerHTML=arr.map(cardHTML).join('');
 }
 function filtrar(){
   let q=document.getElementById('filtro').value.toLowerCase();
@@ -29,7 +38,7 @@ async function buscar(){
   if(!f) return;
   let r=await fetch('/api/buscar?folio='+encodeURIComponent(f));
   let j=await r.json();
-  if(j.ok){let u=j.usuaria; document.getElementById('res').innerHTML=`<div class="card"><b>✅ ENCONTRADA: ${u.nombres} ${u.apellidos}</b><br>Folio: ${u.folio}<br>Cel: ${u.celular}</div>`}
+  if(j.ok){let u=j.usuaria; document.getElementById('res').innerHTML=cardHTML(u).replace('card','card" style="justify-content:center')}
   else document.getElementById('res').innerHTML='<b>❌ Folio no encontrado</b>';
 }
 cargar();
