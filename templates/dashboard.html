@@ -114,10 +114,17 @@ fetch('/api/alertas').then(r=>r.json()).then(list=>{ list.reverse().forEach(d=>{
 function activarParpadeo(){
   let caja = document.getElementById('caja-ultimos');
   caja.classList.add('parpadea-rojo');
-  setTimeout(function(){ caja.classList.remove('parpadea-rojo'); }, 10000);
   let primera = document.querySelector('#tabla tr');
   if(primera) primera.classList.add('fila-nueva');
 }
+// APAGAR PARPADEO AL APRETAR ATENDIDO
+document.addEventListener('click', function(e){
+  if(e.target.textContent.includes('Atendido')){
+    document.getElementById('caja-ultimos').classList.remove('parpadea-rojo');
+    let f = document.querySelector('#tabla tr');
+    if(f) f.classList.remove('fila-nueva');
+  }
+});
 </script>
 
 </body></html>
