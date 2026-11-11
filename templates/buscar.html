@@ -1,83 +1,36 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Buscar por Folio</title>
-<style>
-body{font-family:Arial;background:#0b2a5b;color:white;padding:20px}
-.box{background:white;color:black;padding:20px;border-radius:10px;max-width:600px;margin:auto}
-input{width:65%;padding:10px;font-size:16px}
-button{padding:10px 15px;background:#0b2a5b;color:white;border:none;border-radius:5px}
-a{color:white}
-.foto{width:120px;height:120px;border-radius:50%;object-fit:cover}
-</style>
-</head>
-<body>
+<style>body{background:#0a2a6b;color:white;font-family:sans-serif;margin:0;padding:20px}input{padding:12px;border-radius:8px;border:0;width:70%;max-width:400px}button{padding:12px 18px;border-radius:8px;border:0;background:#fff;font-weight:bold;cursor:pointer}.card{background:white;color:#222;border-radius:12px;padding:15px;margin:10px 0}a{color:white}</style>
+</head><body>
 <a href="/dashboard">← Volver a Central</a>
-<h2 style="text-align:center">Buscar por Folio</h2>
-<div class="box">
-<input id="folio" placeholder="Ejemplo: 7317-86B7">
-<button onclick="buscar()">Buscar</button>
-<div id="res"></div>
-</div>
-<hr>
+<h1 style="text-align:center">Buscar por Folio</h1>
+<div style="text-align:center"><input id="folio" placeholder="Ejemplo: 3D0F-FFD2"><button onclick="buscar()">Buscar</button></div>
+<div id="res" style="text-align:center;margin-top:15px"></div>
 <h3>Todos los folios creados</h3>
-<input id="filtro" placeholder="Filtrar por folio o nombre..." oninput="filtrar()" style="width:100%;padding:10px">
+<input id="filtro" placeholder="Filtrar por folio o nombre..." oninput="filtrar()" style="width:95%">
 <div id="lista"></div>
-  <script>
-async function buscar(){
-  let f = document.getElementById('folio').value.trim();
-  let r = document.getElementById('res');
-  if(!f){ r.innerHTML = 'Escribe un folio'; return; }
-  let res = await fetch('/api/buscar?folio=' + encodeURIComponent(f));
-  let j = await res.json();
-  if(!j.ok){ r.innerHTML = '<p style="color:red"><b>' + j.error + '</b></p>'; return; }
-  let u = j.usuaria;
-  r.innerHTML = `
-    <hr>
-    ${u.foto ? `<img class="foto" src="${u.foto}">` : ''}
-    <h3>${u.nombres || ''} ${u.apellidos || ''}</h3>
-    <p><b>Folio:</b> ${u.folio || ''}</p>
-    <p><b>Celular:</b> ${u.celular || ''}</p>
-    <p><b>Edad:</b> ${u.edad || ''}</p>
-    <p><b>Dirección:</b> ${u.calle || ''} ${u.numero || ''}, ${u.localidad || ''}</p>
-    <p><b>Adscripción:</b> ${u.adscripcion || ''}</p>
-    <p><b>Autoridad:</b> ${u.autoridad || ''}</p>
-    <p><b>Tipo de delito:</b> ${u.tipo_delito || ''}</p>
-    <p><b>Imputado:</b> ${u.imputado || ''}</p>
-    <p><b>Parentesco:</b> ${u.parentesco || ''}</p>
-    <p><b>Características:</b> ${u.caracteristicas || ''}</p>
-    <p><b>Número carpeta:</b> ${u.numero_carpeta || ''}</p>
-  `;
+<script>
+let todas=[];
+async function cargar(){
+  let r=await fetch('/api/usuarias'); todas=await r.json();
+  mostrar(todas);
 }
-let todos = [];
-async function cargarFolios(){
-  let r = await fetch('/api/alertas');
-  todos = await r.json();
-// quitar duplicados, dejar solo el más nuevo por folio
-let unicos = {};
-todos.forEach(a=>{ unicos[a.folio] = a; });
-todos = Object.values(unicos);
-  // del más nuevo al más viejo
-  todos.reverse();
-  mostrarLista(todos);
-}
-function mostrarLista(arr){
-  let div = document.getElementById('lista');
-  if(!arr.length){ div.innerHTML = '<p>No hay folios todavía</p>'; return; }
-  div.innerHTML = arr.map(a=>{
-   let folio = a.folio;
-    let nom = (a.nombres||'') + ' ' + (a.apellidos||'');
-    let fecha = a.fecha || a.fecha_hora || '';
-    return `<div onclick="document.getElementById('folio').value='${folio}';buscar();" style="padding:10px;border-bottom:1px solid #ddd;cursor:pointer;background:#fff;color:#000;margin:4px 0;border-radius:8px"><b>FOLIO: ${a.folio}</b> - ${a.nombres} ${a.apellidos} <br><small>${a.fecha} | ${a.tipo} | ${a.status}</small></div>`;
-  }).join('');
+function mostrar(arr){
+  if(!arr.length){document.getElementById('lista').innerHTML='<p>No hay folios todavia</p>';return}
+  document.getElementById('lista').innerHTML=arr.map(u=>`<div class="card"><b>${u.folio} - ${u.nombres||''} ${u.apellidos||''}</b><br>Cel: ${u.celular||''} | Edad: ${u.edad||''}<br>${u.calle||''} ${u.numero||''} ${u.municipio||''}</div>`).join('');
 }
 function filtrar(){
-  let q = document.getElementById('filtro').value.toLowerCase();
-  let f = todos.filter(a=> JSON.stringify(a).toLowerCase().includes(q));
-  mostrarLista(f);
+  let q=document.getElementById('filtro').value.toLowerCase();
+  mostrar(todas.filter(u=>(u.folio+' '+u.nombres+' '+u.apellidos).toLowerCase().includes(q)));
 }
-cargarFolios();
-  </script>
-</body>
-</html>
+async function buscar(){
+  let f=document.getElementById('folio').value.trim();
+  if(!f) return;
+  let r=await fetch('/api/buscar?folio='+encodeURIComponent(f));
+  let j=await r.json();
+  if(j.ok){let u=j.usuaria; document.getElementById('res').innerHTML=`<div class="card"><b>✅ ENCONTRADA: ${u.nombres} ${u.apellidos}</b><br>Folio: ${u.folio}<br>Cel: ${u.celular}</div>`}
+  else document.getElementById('res').innerHTML='<b>❌ Folio no encontrado</b>';
+}
+cargar();
+</script></body></html>
