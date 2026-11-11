@@ -190,10 +190,18 @@ async function guardarEditar(){
     foto: fotoFinal
   };
   console.log("Guardando", d);
+try{
   const r = await fetch('/api/actualizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-  const res = await r.json();
-  if(res.ok){ alert('✅ Guardado'); location.reload(); }
-  else { alert('Error del servidor: ' + res.mensaje); }
+  const txt = await r.text();
+  console.log("Respuesta servidor:", txt);
+  let res = {};
+  try{ res = JSON.parse(txt); }catch(e){ res = {ok:r.ok, mensaje:txt}; }
+  if(r.ok){ alert('✅ Guardado'); location.reload(); }
+  else { alert("Error del servidor: " + (res.mensaje || txt)); }
+}catch(e){
+  alert("Error al guardar: " + e);
+  console.log("Error guardar:", e);
+}
 }
 </script>
 </div>
