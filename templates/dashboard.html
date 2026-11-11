@@ -48,14 +48,11 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 <audio id="alarma" loop src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg"></audio>
 
 <script>
-  if(sessionStorage.getItem('cerrado')==='si'){ location.replace('/login'); }
-window.addEventListener('pageshow', function(e){
-  if(sessionStorage.getItem('cerrado')==='si'){ location.replace('/login'); }
-});
+
 function salir(){
   localStorage.clear();
   sessionStorage.clear();
-  sessionStorage.setItem('cerrado','si');
+  
   location.replace('/login');
 }
 const socket=io({transports:['websocket','polling']});
