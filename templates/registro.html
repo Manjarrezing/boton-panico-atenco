@@ -1,13 +1,11 @@
 <!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Registro - Atenco</title><style>body{font-family:Arial;background:#0a5cad;padding:20px} .card{background:white;padding:16px;border-radius:10px;max-width:700px;margin:auto} input{width:48%;padding:10px;margin:4px;border-radius:8px;border:1px solid #ccc;box-sizing:border-box} button{padding:12px;background:#0a5cad;color:white;border:none;border-radius:8px;width:100%;font-size:16px}</style></head>
-<body><div class="card"><h2>➕ Nueva Usuaria </h2><input id="nombres" placeholder="Nombres"><input id="apellidos" placeholder="Apellidos"><input id="mac" placeholder="MAC: C30000400DE9"><input id="edad" placeholder="Edad" type="number"><input id="celular" placeholder="Celular"><input id="otro" placeholder="Otro teléfono"><input id="calle" placeholder="Calle"><input id="numero" placeholder="Número"><input id="entre_calles" placeholder="Entre calles"><input id="referencia" placeholder="Referencia"><input id="localidad" placeholder="Localidad"><input id="cp" placeholder="C.P."><input id="num_carpeta" placeholder="Número de carpeta"><input id="imputado" placeholder="Imputado"><input id="adscripcion" placeholder="Adscripcion"><input id="autoridad" placeholder="Autoridad"><input id="tipo_delito" placeholder="Tipo de delito"><input id="parentesco" placeholder="Parentesco"><input id="caracteristicas" placeholder="Caracteristicas del imputado"><label style="display:block;text-align:left;margin-top:10px;font-weight:bold">Foto de la persona:</label><input type="file" id="foto" accept="image/*"><input id="notas" placeholder="Notas"><button onclick="guardarConFoto(); return false;">Guardar Usuaria</button><p id="res"></p><a href="/dashboard">← Volver a Central</a></div>
-<script>async function guardar(){ let d={}; ['nombres','apellidos','mac','edad','celular','otro','calle','numero','entre_calles','referencia','localidad','cp','num_carpeta','imputado','adscripcion','autoridad','tipo_delito','parentesco','caracteristicas','notas'].forEach(k=>d[k]=document.getElementById(k).value); d.municipio='SAN MATEO ATENCO'; d.estado='ESTADO DE MEXICO';let f=document.getElementById('foto'); if(f && f.files[0]){d.foto=await new Promise(r=>{let rd=new FileReader(); rd.onload=()=>r(rd.result); rd.readAsDataURL(f.files[0])});} let r=await fetch('/api/registro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}); let j=await r.json(); document.getElementById('res').innerText=j.ok?'✅ Guardada Folio: '+j.folio:'Error '+j.error; }</script>  
-<script>
+<body><div class="card"><h2>➕ Nueva Usuaria </h2><input id="nombres" placeholder="Nombres"><input id="apellidos" placeholder="Apellidos"><input id="mac" placeholder="MAC: C30000400DE9"><input id="edad" placeholder="Edad" type="number"><input id="celular" placeholder="Celular"><input id="otro" placeholder="Otro teléfono"><input id="calle" placeholder="Calle"><input id="numero" placeholder="Número"><input id="entre_calles" placeholder="Entre calles"><input id="referencia" placeholder="Referencia"><input id="localidad" placeholder="Localidad"><input id="cp" placeholder="C.P."><input id="num_carpeta" placeholder="Número de carpeta"><input id="imputado" placeholder="Imputado"><input id="adscripcion" placeholder="Adscripcion"><input id="autoridad" placeholder="Autoridad"><input id="tipo_delito" placeholder="Tipo de delito"><input id="parentesco" placeholder="Parentesco"><input id="caracteristicas" placeholder="Caracteristicas del imputado"><label style="display:block;text-align:left;margin-top:10px;font-weight:bold">Foto de la persona:</label><input type="file" id="foto" accept="image/*"><input id="notas" placeholder="Notas"><button type="button" onclick="guardarConFoto(); return false;">Guardar Usuaria</button><p id="res"></p><a href="/dashboard">← Volver a Central</a></div>
 <script>
 async function guardarConFoto(){
   let fileInput = document.querySelector('input[type="file"]');
   let data = {};
   document.querySelectorAll('input, select, textarea').forEach(el=>{
-    let k = el.name || el.id || el.placeholder;
+    let k = el.name || el.id;
     if(!k || el.type==='file' || el.type==='submit' || el.type==='button') return;
     data[k]=el.value;
   });
@@ -36,6 +34,5 @@ async function enviar(data){
     if(j.folio) window.location.href='/buscar';
   }catch(err){ alert('Error: '+err); }
 }
-</script>
 </script>
 </body></html>
