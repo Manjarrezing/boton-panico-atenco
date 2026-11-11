@@ -110,8 +110,7 @@ async function guardarEditar(){
   if(!datos.folio){ alert('Pon el folio'); return; }
   try{
     var r = await fetch('/api/actualizar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(datos)});
-        if(r.ok){
-      // Mensaje bonito sin el nombre de la página
+    if(r.ok){
       var aviso = document.createElement('div');
       aviso.textContent = '✅ Guardado';
       aviso.style.cssText = 'position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#22c55e; color:white; padding:15px 25px; border-radius:10px; font-size:18px; z-index:9999; box-shadow:0 4px 10px rgba(0,0,0,0.3)';
@@ -124,7 +123,6 @@ async function guardarEditar(){
     alert('Error de conexión, intenta de nuevo');
   }
 }
-
 </script>
 </div>
 </div>
