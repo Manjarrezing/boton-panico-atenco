@@ -159,8 +159,13 @@ def api_actualizar():
     try:
         d = request.get_json()
         conn = db(); c = cur(conn)
-        c.execute("UPDATE usuarias SET mac=%s, otro=%s, hijos=%s, notas=%s, discapacidad=%s, inicio_medida=%s, duracion=%s, fecha_entrega=%s, fecha_fin=%s WHERE folio=%s",
-          (d.get('nac'), d.get('otro'), d.get('hijos'), d.get('notas'), d.get('discapacidad'), d.get('inicio'), d.get('duracion'), d.get('fecha_entrega'), d.get('fecha_fin'), d.get('folio')))
+        # Si no mandaron foto nueva, no borramos la vieja
+        if d.get('foto'):
+            c.execute("""UPDATE usuarias SET nombres=%s, apellidos=%s, mac=%s, edad=%s, nac=%s, celular=%s, otro=%s, hijos=%s, calle=%s, numero=%s, entrecalles=%s, referencia=%s, localidad=%s, cp=%s, carpeta=%s, imputado=%s, adscripcion=%s, autoridad=%s, tipo_delito=%s, parentesco=%s, permanencia=%s, caracteristicas=%s, discapacidad=%s, inicio_medida=%s, duracion=%s, fecha_entrega=%s, fecha_fin=%s, notas=%s, foto=%s WHERE folio=%s""",
+            (d.get('nombres'), d.get('apellidos'), d.get('mac'), d.get('edad'), d.get('nac'), d.get('celular'), d.get('otro'), d.get('hijos'), d.get('calle'), d.get('numero'), d.get('entrecalles'), d.get('referencia'), d.get('localidad'), d.get('cp'), d.get('carpeta'), d.get('imputado'), d.get('adscripcion'), d.get('autoridad'), d.get('tipo_delito'), d.get('parentesco'), d.get('permanencia'), d.get('caracteristicas'), d.get('discapacidad'), d.get('inicio'), d.get('duracion'), d.get('fecha_entrega'), d.get('fecha_fin'), d.get('notas'), d.get('foto'), d.get('folio')))
+        else:
+            c.execute("""UPDATE usuarias SET nombres=%s, apellidos=%s, mac=%s, edad=%s, nac=%s, celular=%s, otro=%s, hijos=%s, calle=%s, numero=%s, entrecalles=%s, referencia=%s, localidad=%s, cp=%s, carpeta=%s, imputado=%s, adscripcion=%s, autoridad=%s, tipo_delito=%s, parentesco=%s, permanencia=%s, caracteristicas=%s, discapacidad=%s, inicio_medida=%s, duracion=%s, fecha_entrega=%s, fecha_fin=%s, notas=%s WHERE folio=%s""",
+            (d.get('nombres'), d.get('apellidos'), d.get('mac'), d.get('edad'), d.get('nac'), d.get('celular'), d.get('otro'), d.get('hijos'), d.get('calle'), d.get('numero'), d.get('entrecalles'), d.get('referencia'), d.get('localidad'), d.get('cp'), d.get('carpeta'), d.get('imputado'), d.get('adscripcion'), d.get('autoridad'), d.get('tipo_delito'), d.get('parentesco'), d.get('permanencia'), d.get('caracteristicas'), d.get('discapacidad'), d.get('inicio'), d.get('duracion'), d.get('fecha_entrega'), d.get('fecha_fin'), d.get('notas'), d.get('folio')))
         conn.commit(); conn.close()
         return jsonify({"ok": True, "mensaje": "Actualizado"})
     except Exception as e:
