@@ -100,13 +100,23 @@ function cerrarEditar(){ document.getElementById('modalEditar').style.display='n
 
 function abrirEditar(datos){
   document.getElementById('modalEditar').style.display='block';
+  if(typeof datos === 'string'){ try{ datos = JSON.parse(datos); }catch(e){} }
+  console.log("Datos que llegan:", datos);
+  window.fotoActual = datos.foto || "";
+  // Mapeo por si la base usa otro nombre
+  let mapa = {
+    nombre:'nombres', telefono:'celular', fecha_nac:'nac',
+    fecha_nacimiento:'nac', entre_calles:'entrecalles',
+    inicio_medida:'inicio', entrega:'fecha_entrega', fin:'fecha_fin'
+  };
+  for(let k in mapa){ if(datos[k] && !datos[mapa[k]]) datos[mapa[k]] = datos[k]; }
   for(var k in datos){
     var el = document.getElementById('m_'+k);
     if(el) el.value = datos[k] || '';
   }
   if(datos.foto){
     var img = document.getElementById('m_foto_actual');
-    img.src = datos.foto; img.style.display='block';
+    if(img){ img.src = datos.foto; img.style.display='block'; }
   }
 }
 
