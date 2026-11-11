@@ -108,10 +108,15 @@ async function guardarEditar(){
     fecha_fin: document.getElementById('m_fin').value
   };
   if(!datos.folio){ alert('Pon el folio'); return; }
-  var r = await fetch('/api/actualizar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(datos)});
-  var j = await r.json();
-  alert(j.mensaje || 'Guardado');
-  location.reload();
+  try{
+    alert('Enviando... espera');
+    var r = await fetch('/api/actualizar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(datos)});
+    var texto = await r.text();
+    alert('El servidor dice: ' + texto);
+    if(r.ok) location.reload();
+  }catch(e){
+    alert('Error de conexión: ' + e);
+  }
 }
 </script>
 </div>
