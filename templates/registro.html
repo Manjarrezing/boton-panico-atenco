@@ -2,7 +2,8 @@
 <body><div class="card"><h2>➕ Nueva Usuaria </h2><input id="nombres" placeholder="Nombres"><input id="apellidos" placeholder="Apellidos"><input id="mac" placeholder="MAC: C30000400DE9"><input id="edad" placeholder="Edad" type="number"><input id="celular" placeholder="Celular"><input id="otro" placeholder="Otro teléfono"><input id="calle" placeholder="Calle"><input id="numero" placeholder="Número"><input id="entre_calles" placeholder="Entre calles"><input id="referencia" placeholder="Referencia"><input id="localidad" placeholder="Localidad"><input id="cp" placeholder="C.P."><input id="num_carpeta" placeholder="Número de carpeta"><input id="imputado" placeholder="Imputado"><input id="adscripcion" placeholder="Adscripcion"><input id="autoridad" placeholder="Autoridad"><input id="tipo_delito" placeholder="Tipo de delito"><input id="parentesco" placeholder="Parentesco"><input id="caracteristicas" placeholder="Caracteristicas del imputado"><label style="display:block;text-align:left;margin-top:10px;font-weight:bold">Foto de la persona:</label><input type="file" id="foto" accept="image/*"><input id="notas" placeholder="Notas"><button onclick="guardar()">Guardar Usuaria</button><p id="res"></p><a href="/dashboard">← Volver a Central</a></div>
 <script>async function guardar(){ let d={}; ['nombres','apellidos','mac','edad','celular','otro','calle','numero','entre_calles','referencia','localidad','cp','num_carpeta','imputado','adscripcion','autoridad','tipo_delito','parentesco','caracteristicas','notas'].forEach(k=>d[k]=document.getElementById(k).value); d.municipio='SAN MATEO ATENCO'; d.estado='ESTADO DE MEXICO';let f=document.getElementById('foto'); if(f && f.files[0]){d.foto=await new Promise(r=>{let rd=new FileReader(); rd.onload=()=>r(rd.result); rd.readAsDataURL(f.files[0])});} let r=await fetch('/api/registro',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}); let j=await r.json(); document.getElementById('res').innerText=j.ok?'✅ Guardada Folio: '+j.folio:'Error '+j.error; }</script>  
 <script>
-// PARCHE 2: Agarra el boton Guardar y manda la foto en base64
+<script>
+// PARCHE 3: Comprime foto y manda a /api/registrar
 (function(){
   let btn = [...document.querySelectorAll('button')].find(b=>b.textContent.includes('Guardar'));
   if(!btn) return;
@@ -15,29 +16,32 @@
       if(!k || el.type==='file' || el.type==='submit' || el.type==='button') return;
       data[k]=el.value;
     });
-    if(data['Nombres']) data.nombres = data['Nombres'];
-    if(data['Apellidos']) data.apellidos = data['Apellidos'];
-    if(data['Celular']) data.celular = data['Celular'];
-    if(data['Calle']) data.calle = data['Calle'];
-    if(data['Número']) data.numero = data['Número'];
-    if(data['Edad']) data.edad = data['Edad'];
     if(fileInput && fileInput.files[0]){
-      let r = new FileReader();
-      r.onload = async ()=>{
-        data.foto = r.result; data.foto_base64 = r.result; data.foto_url = r.result;
+      let img = new Image();
+      let url = URL.createObjectURL(fileInput.files[0]);
+      img.onload = async ()=>{
+        let canvas = document.createElement('canvas');
+        let scale = Math.min(1, 800 / img.width);
+        canvas.width = img.width * scale; canvas.height = img.height * scale;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        let compressed = canvas.toDataURL('image/jpeg', 0.7);
+        data.foto = compressed; data.foto_base64 = compressed; data.foto_url = compressed;
         await enviar(data);
       };
-      r.readAsDataURL(fileInput.files[0]);
+      img.src = url;
     } else { await enviar(data); }
   }, true);
   async function enviar(data){
     try{
       let res = await fetch('/api/registrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-      let j = await res.json();
+      let txt = await res.text();
+      let j = {};
+      try{ j = JSON.parse(txt); }catch(_){ alert('Servidor dijo: '+txt.slice(0,200)); return; }
       alert('Guardado. Folio: '+(j.folio||'OK'));
       if(j.folio) window.location.href='/buscar';
     }catch(err){ alert('Error: '+err); }
   }
 })();
+</script>
 </script>
 </body></html>
