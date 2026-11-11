@@ -159,7 +159,14 @@ def api_actualizar():
     try:
         d = request.get_json()
         conn = db(); c = cur(conn)
-        # Si no mandaron foto nueva, no borramos la vieja
+        # Crear columnas si no existen
+        cols = ['nombres','apellidos','mac','edad','nac','celular','otro','hijos','calle','numero','entrecalles','referencia','localidad','cp','carpeta','imputado','adscripcion','autoridad','tipo_delito','parentesco','permanencia','caracteristicas','discapacidad','inicio_medida','duracion','fecha_entrega','fecha_fin','notas','foto']
+        for col in cols:
+            try:
+                c.execute(f"ALTER TABLE usuarias ADD COLUMN IF NOT EXISTS {col} TEXT")
+            except Exception:
+                conn.rollback()
+        conn.commit()
         if d.get('foto'):
             c.execute("""UPDATE usuarias SET nombres=%s, apellidos=%s, mac=%s, edad=%s, nac=%s, celular=%s, otro=%s, hijos=%s, calle=%s, numero=%s, entrecalles=%s, referencia=%s, localidad=%s, cp=%s, carpeta=%s, imputado=%s, adscripcion=%s, autoridad=%s, tipo_delito=%s, parentesco=%s, permanencia=%s, caracteristicas=%s, discapacidad=%s, inicio_medida=%s, duracion=%s, fecha_entrega=%s, fecha_fin=%s, notas=%s, foto=%s WHERE folio=%s""",
             (d.get('nombres'), d.get('apellidos'), d.get('mac'), d.get('edad'), d.get('nac'), d.get('celular'), d.get('otro'), d.get('hijos'), d.get('calle'), d.get('numero'), d.get('entrecalles'), d.get('referencia'), d.get('localidad'), d.get('cp'), d.get('carpeta'), d.get('imputado'), d.get('adscripcion'), d.get('autoridad'), d.get('tipo_delito'), d.get('parentesco'), d.get('permanencia'), d.get('caracteristicas'), d.get('discapacidad'), d.get('inicio'), d.get('duracion'), d.get('fecha_entrega'), d.get('fecha_fin'), d.get('notas'), d.get('foto'), d.get('folio')))
