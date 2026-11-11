@@ -100,16 +100,34 @@ function cerrarEditar(){ document.getElementById('modalEditar').style.display='n
 
 function abrirEditar(datos){
   document.getElementById('modalEditar').style.display='block';
+  // Si no le mandaron datos, buscarlos donde ya están en la página
+  if(!datos || (typeof datos === 'object' && Object.keys(datos).length === 0)){
+    datos = window.personaActual || window.datosActual || window.ultima || window.currentPersona || null;
+  }
+  if(datos){ llenarEditar(datos); return; }
+  // Si no hay variable global, buscar por folio que está en pantalla
+  var folioEl = document.getElementById('ultFolio') || document.getElementById('folio') || document.querySelector('[id*="Folio"]');
+  var folio = folioEl ? folioEl.textContent.trim() : '';
+  if(folio){
+    // Intentar traerla del servidor
+    fetch('/api/persona/' + folio).then(r=>r.json()).then(d=>{ if(d && d.folio) llenarEditar(d); }).catch(()=>{});
+    fetch('/api/ultima').then(r=>r.json()).then(d=>{ if(d && (d.folio || d.nombres)) llenarEditar(d); }).catch(()=>{});
+  }
+  // Mientras tanto, llenar con lo que se ve en la tarjeta
+  setTimeout(function(){
+    var d2 = {};
+    var mapaDom = {folio:'ultFolio', nombres:'ultNombre', apellidos:'ultApellidos', mac:'ultMAC', edad:'ultEdad', celular:'ultCelular', calle:'ultCalle'};
+    for(var k in mapaDom){
+      var el = document.getElementById(mapaDom[k]);
+      if(el) d2[k] = el.textContent.trim();
+    }
+    if(d2.nombres) llenarEditar(d2);
+  }, 300);
+}
+
+function llenarEditar(datos){
   if(typeof datos === 'string'){ try{ datos = JSON.parse(datos); }catch(e){} }
-  console.log("Datos que llegan:", datos);
   window.fotoActual = datos.foto || "";
-  // Mapeo por si la base usa otro nombre
-  let mapa = {
-    nombre:'nombres', telefono:'celular', fecha_nac:'nac',
-    fecha_nacimiento:'nac', entre_calles:'entrecalles',
-    inicio_medida:'inicio', entrega:'fecha_entrega', fin:'fecha_fin'
-  };
-  for(let k in mapa){ if(datos[k] && !datos[mapa[k]]) datos[mapa[k]] = datos[k]; }
   for(var k in datos){
     var el = document.getElementById('m_'+k);
     if(el) el.value = datos[k] || '';
@@ -119,7 +137,6 @@ function abrirEditar(datos){
     if(img){ img.src = datos.foto; img.style.display='block'; }
   }
 }
-
 function v(id){ let e=document.getElementById(id); return e ? e.value : ""; }
 
 async function guardarEditar(){
