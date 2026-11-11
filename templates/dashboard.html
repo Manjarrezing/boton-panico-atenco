@@ -55,6 +55,30 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 </div>
 <button onclick="atender()" style="width:100%;background:#0a0;color:white;margin-top:10px">✅ Marcar como Atendido</button>
 <button onclick="llamar()" style="width:100%;background:#0a5cad;color:white;margin-top:6px">📞 Llamar a usuaria</button>
+  <button onclick="editarDatos()" style="width:100%;background:#FFC107;color:black;margin-top:6px;padding:12px;border:none;border-radius:10px;font-weight:bold;cursor:pointer;">✏️ Editar datos vacíos</button>
+<script>
+async function editarDatos(){
+  var folio = document.getElementById('rFolio') ? document.getElementById('rFolio').innerText : '';
+  if(!folio || folio=='-'){
+    folio = prompt('¿Cuál es el folio? Ej: 1540-1C62');
+  }
+  if(!folio) return;
+  var nac = prompt('NAC / Fecha nacimiento (AAAA-MM-DD):', '');
+  var otro = prompt('Otro teléfono:', '');
+  var hijos = prompt('Hijos:', '');
+  var notas = prompt('Notas:', '');
+  var discapacidad = prompt('Discapacidad:', '');
+  var inicio = prompt('Inicio medida (AAAA-MM-DD):', '');
+  var duracion = prompt('Duración:', '');
+  var entrega = prompt('Fecha entrega pulsera (AAAA-MM-DD):', '');
+  var fin = prompt('Fecha fin (AAAA-MM-DD):', '');
+  var datos = {folio:folio, nac:nac, otro:otro, hijos:hijos, notas:notas, discapacidad:discapacidad, inicio:inicio, duracion:duracion, fecha_entrega:entrega, fecha_fin:fin};
+  var r = await fetch('/api/actualizar', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(datos)});
+  var j = await r.json();
+  alert(j.mensaje || 'Guardado');
+  location.reload();
+}
+</script>
 </div>
 </div>
 </div>
