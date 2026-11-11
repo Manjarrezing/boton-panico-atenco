@@ -54,6 +54,10 @@ let todos = [];
 async function cargarFolios(){
   let r = await fetch('/api/alertas');
   todos = await r.json();
+// quitar duplicados, dejar solo el más nuevo por folio
+let unicos = {};
+todos.forEach(a=>{ unicos[a.folio] = a; });
+todos = Object.values(unicos);
   // del más nuevo al más viejo
   todos.reverse();
   mostrarLista(todos);
