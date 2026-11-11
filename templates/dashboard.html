@@ -22,6 +22,19 @@ table{width:100%;border-collapse:collapse;font-size:13px} th{background:#0a5cad;
 .pill{background:#6a1b9a;color:white;padding:8px;border-radius:20px;text-align:center;font-weight:bold}
 button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 @media(max-width:900px){#layout{flex-direction:column}#sidebar{width:100%;display:flex}#main{flex-direction:column}#right{width:100%}}
+@keyframes parpadeoRojo {
+  0% { background-color: #ff0000; box-shadow: 0 0 20px red; }
+  50% { background-color: #ffffff; box-shadow: none; }
+  100% { background-color: #ff0000; box-shadow: 0 0 20px red; }
+}
+.parpadea-rojo {
+  animation: parpadeoRojo 0.7s infinite;
+  border: 3px solid red !important;
+}
+.fila-nueva {
+  background: #ffcccc !important;
+  font-weight: bold;
+}
 </style></head>
 <body>
 <div id="top"><div>🛡️ <b>XONACTLÁN</b> | Central de Alertamientos</div><div>🔔 <span id="contador">0</span> | <button onclick="location.reload()">↻</button></div></div>
@@ -29,7 +42,7 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 <div id="sidebar"><b>TANIA<br>ANDREA</b><p style="font-size:11px">A GENERAL</p><div class="active">👤 Usuario</div><div onclick="location.href='/buscar'">🔍 Buscar</div><div>📋 Encuesta</div><div>🛎️ Servicios</div><div onclick="salir()">🚪 Salir</div><div onclick="location.href='/registro'">➕ Nuevo Registro</div></div>
 <div id="main">
 <div id="left">
-<div class="card"><b>Últimos alertamientos:</b><table><thead><tr><th>Folio</th><th>Folio CAD</th><th>Nombres</th><th>Apellidos</th><th>Fecha y hora</th></tr></thead><tbody id="tabla"></tbody></table></div>
+<div class="card" id="caja-ultimos"><b>Últimos alertamientos</b><table><thead><tr><th>Folio</th><th>Folio CAD</th><th>Nombres</th><th>Apellidos</th><th>Fecha y hora</th></tr></thead><tbody id="tabla"></tbody></table></div>
 <div class="card"><div id="map"></div><p style="font-size:12px"><b>📍 Última ubicación en vivo</b> - <span id="coords">Esperando alerta...</span> | <a href="#" id="gmaps" target="_blank">Abrir Google Maps</a></p></div>
 <div class="card"><b>Dirección:</b><div id="dirTxt">Selecciona un alertamiento de la tabla</div></div>
 <div class="card" style="background:#0b2a4a;color:white"><b>Adscripción: <span id="ads">-</span></b><br>Autoridad: <span id="autoridad">-</span><br>Tipo de delito: <span id="delito">-</span><br>Imputado: <span id="imputado">-</span> | Parentesco: <span id="parentesco">-</span><br>Características: <span id="caract">-</span></div>
@@ -92,11 +105,19 @@ socket.on('nueva_alerta', d=>{
   tr.onclick=()=>mostrar(d);
   document.getElementById('tabla').prepend(tr);
   mostrar(d);
+  activarParpadeo();
 });
 socket.on('ubicacion_update', d=>{ if(marker && actual && d.folio===actual.folio){ marker.setLatLng([d.lat,d.lng]); document.getElementById('coords').innerText=d.lat+', '+d.lng+' - EN VIVO'; } });
 function atender(){ if(actual){ socket.emit('atender',{id:actual.id}); document.getElementById('rAtendido').innerText='Atendido'; document.getElementById('alarma').pause(); alert('Marcado como atendido'); } }
 function llamar(){ if(actual) window.location.href='tel:'+actual.celular; }
 fetch('/api/alertas').then(r=>r.json()).then(list=>{ list.reverse().forEach(d=>{ let tr=document.createElement('tr'); tr.innerHTML='<td>'+d.folio+'</td><td>'+(d.folio_cad||'None')+'</td><td>'+d.nombres+'</td><td>'+d.apellidos+'</td><td>'+d.fecha+'</td>'; tr.onclick=()=>mostrar(d); document.getElementById('tabla').appendChild(tr); }); if(list.length) mostrar(list[list.length-1]); });
+function activarParpadeo(){
+  let caja = document.getElementById('caja-ultimos');
+  caja.classList.add('parpadea-rojo');
+  setTimeout(function(){ caja.classList.remove('parpadea-rojo'); }, 10000);
+  let primera = document.querySelector('#tabla tr');
+  if(primera) primera.classList.add('fila-nueva');
+}
 </script>
 
 </body></html>
