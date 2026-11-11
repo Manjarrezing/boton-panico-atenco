@@ -20,7 +20,11 @@ a{color:white}
 <button onclick="buscar()">Buscar</button>
 <div id="res"></div>
 </div>
-<script>
+<hr>
+<h3>Todos los folios creados</h3>
+<input id="filtro" placeholder="Filtrar por folio o nombre..." oninput="filtrar()" style="width:100%;padding:10px">
+<div id="lista"></div>
+  <script>
 async function buscar(){
   let f = document.getElementById('folio').value.trim();
   let r = document.getElementById('res');
@@ -46,6 +50,30 @@ async function buscar(){
     <p><b>Número carpeta:</b> ${u.numero_carpeta || ''}</p>
   `;
 }
-</script>
+let todos = [];
+async function cargarFolios(){
+  let r = await fetch('/api/alertas');
+  todos = await r.json();
+  // del más nuevo al más viejo
+  todos.reverse();
+  mostrarLista(todos);
+}
+function mostrarLista(arr){
+  let div = document.getElementById('lista');
+  if(!arr.length){ div.innerHTML = '<p>No hay folios todavía</p>'; return; }
+  div.innerHTML = arr.map(a=>{
+    let folio = a.folio || a.folio_cad || a.id;
+    let nom = (a.nombres||'') + ' ' + (a.apellidos||'');
+    let fecha = a.fecha || a.fecha_hora || '';
+    return `<div onclick="document.getElementById('folio').value='${folio}';buscar();" style="padding:10px;border-bottom:1px solid #ddd;cursor:pointer;background:#f9f9f9;margin:4px 0;border-radius:8px"><b>${folio}</b> - ${nom} <br><small>${fecha}</small></div>`;
+  }).join('');
+}
+function filtrar(){
+  let q = document.getElementById('filtro').value.toLowerCase();
+  let f = todos.filter(a=> JSON.stringify(a).toLowerCase().includes(q));
+  mostrarLista(f);
+}
+cargarFolios();
+  </script>
 </body>
 </html>
