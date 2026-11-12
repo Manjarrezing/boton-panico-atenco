@@ -179,12 +179,16 @@ if(elFin && elFin.value) datos['fecha_fin'] = elFin.value;
     }
     if(!datos.folio){ alert('Falta el Folio'); return; }
     
-    var _ent = document.getElementById('m_fecha_entrega') || document.getElementById('mEntrega') || document.getElementById('e_fecha_entrega') || document.getElementById('eEntrega');
-if(_ent && _ent.value) datos['fecha_entrega'] = _ent.value;
-var _fin = document.getElementById('m_fecha_fin') || document.getElementById('mFin') || document.getElementById('e_fecha_fin') || document.getElementById('eFin');
-if(_fin && _fin.value) datos['fecha_fin'] = _fin.value;
-var _ini = document.getElementById('m_inicio_medida') || document.getElementById('mInicio') || document.getElementById('e_inicio_medida') || document.getElementById('eInicio');
-if(_ini && _ini.value) datos['inicio_medida'] = _ini.value;
+  var _mapF = {};
+document.querySelectorAll('#modalEditar input[type="date"]').forEach(function(inp){
+  var txt = inp.parentElement ? inp.parentElement.textContent : '';
+  if(txt.indexOf('Fecha entrega') !== -1) _mapF.entrega = inp.value;
+  if(txt.indexOf('Fecha fin') !== -1) _mapF.fin = inp.value;
+  if(txt.indexOf('Inicio medida') !== -1) _mapF.inicio = inp.value;
+});
+if(_mapF.entrega){ datos['fecha_entrega'] = _mapF.entrega; datos['fecha_entrega_pulsera'] = _mapF.entrega; }
+if(_mapF.fin){ datos['fecha_fin'] = _mapF.fin; }
+if(_mapF.inicio){ datos['inicio_medida'] = _mapF.inicio; }
     
     var r = await fetch('/api/actualizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
     var txt = await r.text();
