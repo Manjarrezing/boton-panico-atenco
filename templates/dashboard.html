@@ -255,7 +255,7 @@ document.addEventListener('click', function(e){
 });
 </script>
 <script>
-// DOBLE CLIC PARA EDITAR - versión que sí agarra aunque la tabla cargue tarde
+// DOBLE CLIC PARA EDITAR - v3: busca datos y llena el formulario
 document.addEventListener('dblclick', function(e){
   var fila = e.target.closest ? e.target.closest('tr') : null;
   if(!fila) return;
@@ -264,18 +264,24 @@ document.addEventListener('dblclick', function(e){
   if(celdas.length === 0) return;
   var folio = celdas[0].innerText.trim();
   if(!folio || folio === 'Folio') return;
-  alert('Abriendo para editar: ' + folio);
-  window.folioAEditar = folio;
-  try{
-    if(typeof abrirEditar === 'function') return abrirEditar(folio);
-    if(typeof editarRegistro === 'function') return editarRegistro(folio);
-    if(typeof editarDatos === 'function') return editarDatos(folio);
-    if(typeof mostrarEditar === 'function') return mostrarEditar(folio);
-  }catch(err){ alert('Error al abrir: ' + err); }
-  var inputFolio = document.getElementById('m_folio');
-  if(inputFolio) inputFolio.value = folio;
-  var modal = document.getElementById('modalEditar') || document.querySelector('[id*="Editar"]');
-  if(modal){ modal.style.display = 'block'; modal.classList.remove('hidden'); }
+
+  fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(list){
+    var d = list.find(function(x){ return (x.folio + '') === folio; });
+    if(!d){ alert('No encontré datos para: ' + folio); return; }
+    // Abrir el modal con el botón amarillo
+    var btnEditar = Array.from(document.querySelectorAll('button')).find(function(b){ return b.innerText.includes('Editar'); });
+    if(btnEditar) btnEditar.click();
+    // Esperar un poquito a que abra y llenarlo
+    setTimeout(function(){
+      Object.keys(d).forEach(function(k){
+        var input = document.getElementById('m_' + k);
+        if(input && d[k] !== null && d[k] !== undefined) input.value = d[k];
+      });
+      // Por si el folio tiene otro nombre
+      var f = document.getElementById('m_folio');
+      if(f && !f.value) f.value = folio;
+    }, 300);
+  }).catch(function(err){ alert('Error buscando datos: ' + err); });
 });
 </script>
 </body></html>
