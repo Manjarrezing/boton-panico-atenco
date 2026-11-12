@@ -8,7 +8,7 @@ import psycopg2.extras
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'atenco-2026'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
-USUARIOS = {'admin': 'Atenco2026'}
+USUARIOS = {'Ing': 'Atenco2026'}
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
