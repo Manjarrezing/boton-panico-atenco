@@ -552,34 +552,41 @@ setInterval(function(){
     if(vEntrega && !lista[1].value) lista[1].value = vEntrega;
     if(vFin && !lista[2].value) lista[2].value = vFin;
   }
-  // 2. MUNICIPIO Y ESTADO - por ID, que es lo más seguro
-  var m = document.getElementById('municipio');
-  if(m && m.offsetParent && !m.value){
-    m.value = 'Xonacatlán';
-    m.dispatchEvent(new Event('input', {bubbles:true}));
-    m.dispatchEvent(new Event('change', {bubbles:true}));
-  }
-  var e = document.getElementById('estado');
-  if(e && e.offsetParent && !e.value){
-    e.value = 'Estado de México';
-    e.dispatchEvent(new Event('input', {bubbles:true}));
-    e.dispatchEvent(new Event('change', {bubbles:true}));
-  }
-}, 500);
-
-// Arreglar pantalla principal - SIN tocar el Editar
+ <script>
 setInterval(function(){
+  // 1. LLENAR EDITAR - por etiqueta, no por ID
+  document.querySelectorAll('input').forEach(function(inp){
+    if(!inp.offsetParent) return;
+    if(inp.value) return;
+    var cont = inp.closest('div');
+    if(!cont) return;
+    var t = (cont.textContent || '').trim();
+    if(t.indexOf('Municipio:') === 0){
+      inp.value = 'Xonacatlán';
+      inp.dispatchEvent(new Event('input', {bubbles:true}));
+      inp.dispatchEvent(new Event('change', {bubbles:true}));
+    }
+    if(t.indexOf('Estado:') === 0){
+      inp.value = 'Estado de México';
+      inp.dispatchEvent(new Event('input', {bubbles:true}));
+      inp.dispatchEvent(new Event('change', {bubbles:true}));
+    }
+  });
+  // 2. ARREGLAR PANTALLA PRINCIPAL - sin tocar el Editar
   document.querySelectorAll('div').forEach(function(div){
     if(div.querySelector('input')) return;
     var h = div.innerHTML || '';
-    if(h.indexOf('Municipio:') !== -1 && h.indexOf('C.P.:') !== -1){
-      var nuevo = h;
-      nuevo = nuevo.replace(/Municipio:\s*<br>/g, 'Municipio: Xonacatlán<br>');
-      nuevo = nuevo.replace(/Estado:\s*<br>/g, 'Estado: Estado de México<br>');
-      if(nuevo !== h) div.innerHTML = nuevo;
-    }
+    if(h.indexOf('Municipio:') === -1) return;
+    if(h.indexOf('C.P.:') === -1) return;
+    var nuevo = h;
+    nuevo = nuevo.replace(/Municipio:\s*(<br[^>]*>)?\s*Estado:/g, 'Municipio: Xonacatlán<br>Estado:');
+    nuevo = nuevo.replace(/Estado:\s*(<br[^>]*>)?\s*C\.P\.:/g, 'Estado: Estado de México<br>C.P.:');
+    nuevo = nuevo.replace(/Municipio:\s*<br[^>]*>/g, 'Municipio: Xonacatlán<br>');
+    nuevo = nuevo.replace(/Estado:\s*<br[^>]*>/g, 'Estado: Estado de México<br>');
+    if(nuevo !== h) div.innerHTML = nuevo;
   });
-}, 1000);
+}, 800);
+</script>
 
 
   
