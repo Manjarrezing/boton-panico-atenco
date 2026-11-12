@@ -462,6 +462,61 @@ document.addEventListener('click', function(e){
     setTimeout(mostrarPalomita, 600);
   }
 });
+
+  // FIX: Fecha entrega pulsera y Fecha fin
+function buscarFechaPorTitulo(titulo){
+  var labels = document.querySelectorAll('label, div, span, p');
+  for(var i=0;i<labels.length;i++){
+    if(labels[i].textContent.trim() === titulo){
+      var cont = labels[i].parentElement;
+      var inp = cont.querySelector('input[type="date"], input');
+      if(inp) return inp;
+    }
+  }
+  // Si no lo encuentra por titulo, busca por orden: Inicio, Entrega, Fin
+  var fechas = document.querySelectorAll('input[type="date"]');
+  if(titulo.includes('entrega') && fechas[1]) return fechas[1];
+  if(titulo.includes('fin') && fechas[2]) return fechas[2];
+  return null;
+}
+
+function guardarFechasPulsera(){
+  var f1 = buscarFechaPorTitulo('Fecha entrega pulsera');
+  var f2 = buscarFechaPorTitulo('Fecha fin');
+  if(f1 && f1.value) localStorage.setItem('fecha_pulsera_' + (document.querySelector('input')?.value || 'actual'), f1.value);
+  if(f2 && f2.value) localStorage.setItem('fecha_fin_' + (document.querySelector('input')?.value || 'actual'), f2.value);
+  // Guardar tambien en general para mostrar en morado
+  if(f1 && f1.value) localStorage.setItem('ult_fecha_pulsera', f1.value);
+  if(f2 && f2.value) localStorage.setItem('ult_fecha_fin', f2.value);
+  mostrarFechasEnMorado();
+}
+
+function mostrarFechasEnMorado(){
+  var fp = localStorage.getItem('ult_fecha_pulsera');
+  var ff = localStorage.getItem('ult_fecha_fin');
+  var todo = document.body.innerHTML;
+  // Buscar el recuadro morado por su texto
+  var elementos = document.querySelectorAll('div, p, span, li');
+  elementos.forEach(function(el){
+    if(el.textContent.includes('Fecha entrega pulsera') && el.children.length < 3){
+      if(fp && el.textContent.includes('-')) el.textContent = 'Fecha entrega pulsera: ' + fp;
+    }
+    if(el.textContent.includes('Fecha fin') && el.children.length < 3){
+      if(ff && el.textContent.includes('-')) el.textContent = 'Fecha fin: ' + ff;
+    }
+  });
+}
+
+// Cuando le den Guardar todo, primero guardamos las fechas
+document.addEventListener('click', function(e){
+  if(e.target && e.target.textContent && e.target.textContent.includes('Guardar todo')){
+    guardarFechasPulsera();
+    setTimeout(mostrarFechasEnMorado, 1000);
+    setTimeout(mostrarFechasEnMorado, 2500);
+  }
+});
+setInterval(mostrarFechasEnMorado, 2000);
+  
 function forzarFotoMorado(){
   if(!fotoActualMorado) return;
   // El morado es el div de la derecha, el que tiene el círculo
