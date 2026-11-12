@@ -518,7 +518,7 @@ document.addEventListener('click', function(e){
 }, true);
 </script>
 
-  <script>
+<script>
 var _vigDesde = 0;
 setInterval(function(){
   var texto = document.body.innerText || '';
@@ -540,9 +540,8 @@ setInterval(function(){
   document.querySelectorAll('input[type="date"]').forEach(function(inp){
     if(inp.offsetParent) todos.push(inp);
   });
-  // ¿Hay modal abierto? Si no hay fechas, también checar si hay inputs de texto visibles
-  var hayModal = todos.length >= 3 || document.querySelectorAll('input[type="text"]').length > 0;
-  if(!hayModal){ _vigDesde = 0; return; }
+  // Si no hay modal de fechas abierto, reiniciar
+  if(todos.length < 3){ _vigDesde = 0; return; }
   if(!_vigDesde) _vigDesde = Date.now();
   // Solo los primeros 4 segundos, después te deja modificar libre
   if(Date.now() - _vigDesde > 4000) return;
@@ -553,22 +552,19 @@ setInterval(function(){
     if(vEntrega && !lista[1].value) lista[1].value = vEntrega;
     if(vFin && !lista[2].value) lista[2].value = vFin;
   }
-  // 2. MUNICIPIO Y ESTADO - solo si están vacíos
-  document.querySelectorAll('input, select, textarea').forEach(function(campo){
-    if(!campo.offsetParent) return;
-    var cont = campo.closest('div');
-    var txt = cont ? cont.textContent : '';
-    if(txt.indexOf('Municipio') !== -1 && !campo.value){
-      campo.value = 'Xonacatlán';
-      campo.dispatchEvent(new Event('input', {bubbles:true}));
-      campo.dispatchEvent(new Event('change', {bubbles:true}));
-    }
-    if(txt.indexOf('Estado') !== -1 && txt.indexOf('Estado:') === -1 && !campo.value){
-      campo.value = 'México';
-      campo.dispatchEvent(new Event('input', {bubbles:true}));
-      campo.dispatchEvent(new Event('change', {bubbles:true}));
-    }
-  });
+  // 2. MUNICIPIO Y ESTADO - por ID, que es lo más seguro
+  var m = document.getElementById('municipio');
+  if(m && m.offsetParent && !m.value){
+    m.value = 'Xonacatlán';
+    m.dispatchEvent(new Event('input', {bubbles:true}));
+    m.dispatchEvent(new Event('change', {bubbles:true}));
+  }
+  var e = document.getElementById('estado');
+  if(e && e.offsetParent && !e.value){
+    e.value = 'México';
+    e.dispatchEvent(new Event('input', {bubbles:true}));
+    e.dispatchEvent(new Event('change', {bubbles:true}));
+  }
 }, 500);
 </script>
 </body></html>
