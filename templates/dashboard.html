@@ -152,13 +152,18 @@ async function guardarEditar(){
     alert('Guardando...');
     var datos = {};
     // Todos los campos de texto, menos los vacíos
-    document.querySelectorAll('[id^="m_"]').forEach(function(el){
+    document.querySelectorAll('[id^="m_"], [id^="e_"]').forEach(function(el){
       if(el.type === 'file') return;
-      var k = el.id.replace('m_','');
+      var k = el.id.replace('m_','').replace('e_','');
       var val = el.value ? el.value.trim() : '';
       if(val === '' && k !== 'folio') return;
       datos[k] = el.value;
     });
+    var elEntrega = document.getElementById('mEntrega') || document.getElementById('m_fecha_entrega') || document.getElementById('eEntrega');
+if(elEntrega && elEntrega.value) datos['fecha_entrega'] = elEntrega.value;
+var elFin = document.getElementById('mFin') || document.getElementById('m_fecha_fin') || document.getElementById('eFin');
+if(elFin && elFin.value) datos['fecha_fin'] = elFin.value;
+    
     // FOTO: buscar CUALQUIER input de archivo del modal
     var fileInput = document.querySelector('#modalEditar input[type="file"], input[type="file"][id^="m_"]');
     if(!fileInput) fileInput = document.querySelector('input[type="file"]');
