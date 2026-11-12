@@ -521,6 +521,7 @@ document.addEventListener('click', function(e){
 <script>
 var _vigDesde = 0;
 setInterval(function(){
+  // --- 1. FECHAS ---
   var texto = document.body.innerText || '';
   function sacar(palabra){
     var desde = 0;
@@ -540,29 +541,28 @@ setInterval(function(){
   document.querySelectorAll('input[type="date"]').forEach(function(inp){
     if(inp.offsetParent) todos.push(inp);
   });
-  // Si no hay modal de fechas abierto, reiniciar
-  if(todos.length < 3){ _vigDesde = 0; return; }
-  if(!_vigDesde) _vigDesde = Date.now();
-  // Solo los primeros 4 segundos, después te deja modificar libre
-  if(Date.now() - _vigDesde > 4000) return;
-  // 1. FECHAS
-  var lista = todos.length >= 4 ? todos.slice(-3) : todos;
-  if(lista.length === 3){
-    if(vInicio && !lista[0].value) lista[0].value = vInicio;
-    if(vEntrega && !lista[1].value) lista[1].value = vEntrega;
-    if(vFin && !lista[2].value) lista[2].value = vFin;
+  if(todos.length >= 3){
+    if(!_vigDesde) _vigDesde = Date.now();
+    if(Date.now() - _vigDesde <= 4000){
+      var lista = todos.length >= 4 ? todos.slice(-3) : todos;
+      if(lista.length === 3){
+        if(vInicio && !lista[0].value) lista[0].value = vInicio;
+        if(vEntrega && !lista[1].value) lista[1].value = vEntrega;
+        if(vFin && !lista[2].value) lista[2].value = vFin;
+      }
+    }
+  } else {
+    _vigDesde = 0;
   }
-<script>
-setInterval(function(){
-  // 1. EDITAR - buscar por FILA, no por cuadrito
+  // --- 2. EDITAR MUNICIPIO / ESTADO POR FILA ---
   document.querySelectorAll('input').forEach(function(inp){
     if(!inp.offsetParent) return;
     if(inp.value) return;
+    if(inp.type === 'date') return;
     var a = inp;
     for(var i=0; i<5; i++){
       a = a.parentElement;
       if(!a) break;
-      // La fila tiene SOLO este input y dice Municipio: o Estado:
       if(a.querySelectorAll('input').length === 1){
         var t = a.textContent || '';
         if(t.indexOf('Municipio:') !== -1){
@@ -580,36 +580,19 @@ setInterval(function(){
       }
     }
   });
-  // 2. PRINCIPAL - buscar el renglón solito que dice "Municipio:"
+  // --- 3. PRINCIPAL ---
   document.querySelectorAll('div, span, p').forEach(function(el){
     if(el.querySelector('input')) return;
     if(el.children.length > 0) return;
     var t = (el.textContent || '').trim();
-    if(t === 'Municipio:' || t === 'Municipio:'){
+    if(t === 'Municipio:'){
       el.textContent = 'Municipio: Xonacatlán';
     }
-    if(t === 'Estado:' || t === 'Estado:'){
+    if(t === 'Estado:'){
       el.textContent = 'Estado: Estado de México';
     }
   });
 }, 800);
 </script>
-  // 2. ARREGLAR PANTALLA PRINCIPAL - sin tocar el Editar
-  document.querySelectorAll('div').forEach(function(div){
-    if(div.querySelector('input')) return;
-    var h = div.innerHTML || '';
-    if(h.indexOf('Municipio:') === -1) return;
-    if(h.indexOf('C.P.:') === -1) return;
-    var nuevo = h;
-    nuevo = nuevo.replace(/Municipio:\s*(<br[^>]*>)?\s*Estado:/g, 'Municipio: Xonacatlán<br>Estado:');
-    nuevo = nuevo.replace(/Estado:\s*(<br[^>]*>)?\s*C\.P\.:/g, 'Estado: Estado de México<br>C.P.:');
-    nuevo = nuevo.replace(/Municipio:\s*<br[^>]*>/g, 'Municipio: Xonacatlán<br>');
-    nuevo = nuevo.replace(/Estado:\s*<br[^>]*>/g, 'Estado: Estado de México<br>');
-    if(nuevo !== h) div.innerHTML = nuevo;
-  });
-}, 800);
-</script>
-
-
   
 </body></html>
