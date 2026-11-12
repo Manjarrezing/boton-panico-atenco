@@ -445,6 +445,23 @@ function buscarFotoUsuario(folio){
 }
 window.alert = function(){};
 window.confirm = function(){ return true; };
+  function mostrarPalomita(){
+  var viejo = document.getElementById('palomita-guardado');
+  if(viejo) viejo.remove();
+  var d = document.createElement('div');
+  d.id = 'palomita-guardado';
+  d.innerHTML = '✅<br><span style="font-size:18px">Guardado</span>';
+  d.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:30px 40px;border-radius:20px;font-size:70px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.3);z-index:99999;';
+  document.body.appendChild(d);
+  setTimeout(function(){ d.remove(); }, 1800);
+}
+
+// Cuando le den a Guardar todo, muestra la palomita
+document.addEventListener('click', function(e){
+  if(e.target && e.target.textContent && e.target.textContent.includes('Guardar todo')){
+    setTimeout(mostrarPalomita, 600);
+  }
+});
 function forzarFotoMorado(){
   if(!fotoActualMorado) return;
   // El morado es el div de la derecha, el que tiene el círculo
