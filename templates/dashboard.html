@@ -515,33 +515,40 @@ document.addEventListener('click', function(e){
 </script>
 
   <script>
-function llenarFechasModal(){
+function llenarFechasModal2(){
   var texto = document.body.innerText || '';
   function sacar(palabra){
-    var i = texto.indexOf(palabra);
-    if(i === -1) return '';
-    var pedazo = texto.substring(i, i+80);
-    var m = pedazo.match(/\d{4}-\d{2}-\d{2}/);
-    return m ? m[0] : '';
+    var desde = 0;
+    while(true){
+      var i = texto.indexOf(palabra, desde);
+      if(i === -1) return '';
+      var pedazo = texto.substring(i, i+150);
+      var m = pedazo.match(/\d{4}-\d{2}-\d{2}/);
+      if(m) return m[0];
+      desde = i + palabra.length;
+    }
   }
-  var vInicio = sacar('Inicio medida:');
-  var vEntrega = sacar('Fecha entrega pulsera:');
-  var vFin = sacar('Fecha fin:');
-  var inputs = document.querySelectorAll('input[type="date"]');
-  inputs.forEach(function(inp){
-    if(!inp.offsetParent) return;
-    var txt = inp.parentElement ? inp.parentElement.textContent : '';
-    if(txt.indexOf('Inicio medida') !== -1 && vInicio) inp.value = vInicio;
-    if(txt.indexOf('Fecha entrega') !== -1 && vEntrega) inp.value = vEntrega;
-    if(txt.indexOf('Fecha fin') !== -1 && vFin) inp.value = vFin;
+  var vInicio = sacar('Inicio medida');
+  var vEntrega = sacar('Fecha entrega pulsera');
+  var vFin = sacar('Fecha fin');
+  // Buscar solo los inputs de fecha que sí se ven en el modal
+  var todos = [];
+  document.querySelectorAll('input[type="date"]').forEach(function(inp){
+    if(inp.offsetParent) todos.push(inp);
   });
+  // Si hay 3 visibles son Inicio, Entrega, Fin. Si hay 4, el 1ro es Nacimiento y los 3 últimos son los nuestros
+  var lista = todos.length >= 4 ? todos.slice(-3) : todos;
+  if(lista.length === 3){
+    if(vInicio) lista[0].value = vInicio;
+    if(vEntrega) lista[1].value = vEntrega;
+    if(vFin) lista[2].value = vFin;
+  }
 }
 document.addEventListener('click', function(e){
   if(e.target && e.target.textContent && e.target.textContent.indexOf('Editar datos') !== -1){
-    setTimeout(llenarFechasModal, 400);
-    setTimeout(llenarFechasModal, 1000);
+    setTimeout(llenarFechasModal2, 500);
+    setTimeout(llenarFechasModal2, 1200);
   }
 });
 </script>
-  
  </body></html>
