@@ -151,20 +151,31 @@ async function guardarEditar(){
   try{
     alert('Guardando...');
     var datos = {};
+    // Todos los campos de texto, menos los vacíos
     document.querySelectorAll('[id^="m_"]').forEach(function(el){
       if(el.type === 'file') return;
       var k = el.id.replace('m_','');
       var val = el.value ? el.value.trim() : '';
-      // NO mandar vacíos para no borrar lo que ya existe
       if(val === '' && k !== 'folio') return;
       datos[k] = el.value;
     });
-    if(window.fotoActual) datos.foto = window.fotoActual;
+    // FOTO: buscar CUALQUIER input de archivo del modal
+    var fileInput = document.querySelector('#modalEditar input[type="file"], input[type="file"][id^="m_"]');
+    if(!fileInput) fileInput = document.querySelector('input[type="file"]');
+    if(fileInput && fileInput.files && fileInput.files[0]){
+      datos.foto = await new Promise(function(res){
+        var r = new FileReader();
+        r.onload = function(){ res(r.result); };
+        r.readAsDataURL(fileInput.files[0]);
+      });
+      alert('Foto lista, tamaño: ' + datos.foto.length);
+    } else if(window.fotoActual){
+      datos.foto = window.fotoActual;
+    }
     if(!datos.folio){ alert('Falta el Folio'); return; }
-    console.log('Lo que voy a guardar (sin vacíos):', datos);
     var r = await fetch('/api/actualizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
     var txt = await r.text();
-    if(r.ok){ alert('✅ Guardado sin borrar'); location.reload(); }
+    if(r.ok){ alert('✅ Guardado'); location.reload(); }
     else { alert('Error del servidor: ' + txt); }
   }catch(e){
     alert('Error adentro: ' + e);
