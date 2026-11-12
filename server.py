@@ -8,7 +8,12 @@ import psycopg2.extras
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'atenco-2026'
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
-USUARIOS = {'Ing.Manjarrez': 'Atenco2026'}
+USUARIOS = {
+    'Ing.Manjarrez': 'Atenco2026',
+    'Usuario': 'Atenco2026',
+    'Monitorista1': 'Atenco2026',
+    'Monitorista2': 'Atenco2026'
+}
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -68,6 +73,10 @@ def login_admin():
 def logout():
     session.clear()
     return redirect('/login')
+    @app.route('/api/quien_soy')
+def quien_soy():
+    return jsonify({'usuario': session.get('admin', '')})
+    
 @app.route('/buscar')
 def buscar():
     return send_from_directory('templates', 'buscar.html')
