@@ -521,7 +521,6 @@ document.addEventListener('click', function(e){
 
 <script>
 setInterval(function(){
-  // --- 1. FECHAS dia/mes/año, lo que ya tenias ---
   function fISO(d){ var m=''+(d.getMonth()+1); if(m.length==1)m='0'+m; var a=''+d.getDate(); if(a.length==1)a='0'+a; return d.getFullYear()+'-'+m+'-'+a; }
   function aDMY(t){ return t.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$3/$2/$1'); }
   function poner(inp,val){ try{ var p=window.HTMLInputElement.prototype; var desc=Object.getOwnPropertyDescriptor(p,'value'); if(desc&&desc.set)desc.set.call(inp,val); else inp.value=val; }catch(e){ inp.value=val; } inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); }
@@ -542,44 +541,16 @@ setInterval(function(){
       if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
     });
   }
-
-  // --- 2. NOMBRE DEL USUARIO QUE INICIO SESION ---
-  var nombreGuardado = localStorage.getItem('nombre_usuario_logueado');
-  if(nombreGuardado){
-    document.querySelectorAll('div, p, span, h2, h3').forEach(function(el){
-      var t = el.textContent||'';
-      if(t.indexOf('TANIA')>-1 && t.indexOf('ANDREA')>-1){
-        // Solo cambiamos el contenedor mas chiquito que tiene el nombre
-        if(el.querySelectorAll('div, p, span').length === 0){
-          el.textContent = nombreGuardado.toUpperCase();
-        }
-      }
-    });
-    // Si el nombre esta en 2 renglones TANIA / ANDREA, lo buscamos por el contenedor azul
-    document.querySelectorAll('div').forEach(function(d){
-      if((d.textContent||'').indexOf('TANIA')>-1 && (d.textContent||'').indexOf('A GENERAL')>-1 && d.innerHTML.length < 500){
-        // No borramos el A GENERAL, solo el nombre
-        d.innerHTML = d.innerHTML.replace(/TANIA[\s\S]*?ANDREA/gi, nombreGuardado.toUpperCase());
-      }
-    });
-  }
 },800);
 
-// --- 3. GUARDAR EL NOMBRE CUANDO INICIAN SESION ---
-document.addEventListener('submit', function(e){
-  var form = e.target;
-  var inputs = form.querySelectorAll('input');
-  for(var i=0;i<inputs.length;i++){
-    var tipo = (inputs[i].type||'').toLowerCase();
-    var nombre = (inputs[i].name||'').toLowerCase();
-    var id = (inputs[i].id||'').toLowerCase();
-    if(tipo==='text' || nombre.indexOf('usu')>-1 || nombre.indexOf('user')>-1 || nombre.indexOf('nombre')>-1 || id.indexOf('usu')>-1 || id.indexOf('user')>-1){
-      if(inputs[i].value && inputs[i].value.length > 1){
-        localStorage.setItem('nombre_usuario_logueado', inputs[i].value.trim());
-        break;
-      }
-    }
+fetch('/api/quien_soy').then(function(r){ return r.json(); }).then(function(d){
+  var nombre = d.usuario || '';
+  if(!nombre) return;
+  if(document.body.innerHTML.indexOf('TANIA')>-1){
+    document.body.innerHTML = document.body.innerHTML
+      .replace(/TANIA\s*<br[^>]*>\s*ANDREA/gi, nombre.toUpperCase())
+      .replace(/TANIA\s+ANDREA/gi, nombre.toUpperCase());
   }
-}, true);
+});
 </script>
 </body></html>
