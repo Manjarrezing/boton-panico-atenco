@@ -49,7 +49,7 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 </div>
 <div id="right">
 <div class="pill">ULTIMO ALERTAMIENTO<br><span id="ultNombre">SIN ALERTAS</span><br><span id="ultFecha"></span></div>
-<div style="text-align:center;margin:12px"><img id="foto" src="https://i.pravatar.cc/300?img=47"><br><b id="rNombre">-</b></div>
+<div style="text-align:center;margin:12px"><img id="fotoMorado" src="https://i.pravatar.cc/300?img=47" style="width:120px;height:120px;border-radius:50%;object-fit:cover;"><br><b id="rNombre">-</b></div>
 <div style="font-size:13px;line-height:1.7">
 <b>MAC:</b> <span id="rMac">-</span><br><b>Edad:</b> <span id="rEdad">-</span><br><b>Celular:</b> <span id="rCel">-</span><br><b>Otro:</b> <span id="rOtro">-</span><br><b>Hijos:</b> <span id="rHijos">-</span><br><b>Notas:</b> <span id="rNotas">-</span><br><b>Discapacidad:</b> <span id="rDisc">-</span><br><b>Inicio medida:</b> <span id="rInicio">-</span><br><b>Duración:</b> <span id="rDur">-</span><br><b>Fecha entrega pulsera:</b> <span id="rEntrega">-</span><br><b>Fecha fin:</b> <span id="rFin">-</span><br><b>Número carpeta:</b> <span id="rCarpeta">-</span><br><b>Status:</b> <span id="rStatus" style="color:#0f0">Activo</span><br><b>Atendido:</b> <span id="rAtendido">None</span>
 </div>
@@ -205,7 +205,7 @@ function mostrar(d){
   document.getElementById('ultNombre').innerText=(d.nombres||'')+' '+(d.apellidos||'');
   document.getElementById('ultFecha').innerText=d.fecha||'';
   document.getElementById('rNombre').innerText=(d.nombres||'')+' '+(d.apellidos||'');
-  document.getElementById('foto').src=d.foto||'https://i.pravatar.cc/300?img=47';
+  document.getElementById('fotoMorado').src=d.foto||'https://i.pravatar.cc/300?img=47';
   document.getElementById('rMac').innerText=d.mac||'-'; document.getElementById('rEdad').innerText=d.edad||'-';
   document.getElementById('rCel').innerText=d.celular||'-'; document.getElementById('rOtro').innerText=d.otro||'-';
   document.getElementById('rHijos').innerText=d.hijos??'-'; document.getElementById('rNotas').innerText=d.notas||'-';
