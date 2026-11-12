@@ -255,28 +255,43 @@ document.addEventListener('click', function(e){
 });
 </script>
 <script>
-// DOBLE CLIC v5 - NO usa el botón amarillo, abre y llena directo
-document.addEventListener('dblclick', function(e){
+// v6 - ARREGLA EL BOTON EDITAR: ya no abre siempre el 582
+let folioSeleccionado = null;
+
+// 1. Guardar en qué fila le picaste
+document.addEventListener('click', function(e){
   var fila = e.target.closest ? e.target.closest('tr') : null;
   if(!fila) return;
   if(fila.querySelector('th')) return;
   var celdas = fila.querySelectorAll('td');
   if(celdas.length === 0) return;
   var folio = celdas[0].innerText.trim();
-  if(!folio || folio === 'Folio') return;
-  e.preventDefault();
-  e.stopPropagation();
+  if(folio && folio !== 'Folio'){
+    folioSeleccionado = folio;
+    console.log('SELECCIONADO:', folioSeleccionado);
+  }
+}, true);
+
+// 2. Interceptar el botón amarillo Editar datos ANTES que su código malo
+document.addEventListener('click', function(e){
+  var btn = e.target.closest ? e.target.closest('button') : null;
+  if(!btn) return;
+  if(!btn.innerText.includes('Editar')) return;
+  // Si no has seleccionado nada, no lo dejes abrir el 582
+  if(!folioSeleccionado){
+    alert('Primero dale 1 clic a la fila que quieres editar');
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    return;
+  }
+  e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
 
   fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(j){
     var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []);
-    var d = list.find(function(x){ return (x.folio + '').trim() === folio; });
-    if(!d){ alert('No encontré datos para: ' + folio); return; }
-
-    // 1. Poner este registro como el actual, para que Guardar no se confunda
+    var d = list.find(function(x){ return (x.folio + '').trim() === folioSeleccionado; });
+    if(!d){ alert('No encontré datos para: ' + folioSeleccionado); return; }
     window.actual = d;
     try{ actual = d; }catch(err){}
 
-    // 2. Encontrar el modal de Editar datos SIN picarle al botón
     var modal = document.getElementById('modalEditar') ||
       Array.from(document.querySelectorAll('div')).find(function(div){
         return div.innerText.includes('Editar datos') && div.querySelector('input');
@@ -286,7 +301,7 @@ document.addEventListener('dblclick', function(e){
     modal.classList.remove('hidden');
     modal.style.visibility = 'visible';
 
-    // 3. Llenar por ETIQUETA, no por id, porque los ids no son m_
+    // Llenar por etiqueta
     var mapa = {
       'folio':'folio','nombres':'nombres','apellidos':'apellidos','mac':'mac',
       'edad':'edad','celular':'celular','otro telefono':'otro_telefono',
@@ -295,24 +310,22 @@ document.addEventListener('dblclick', function(e){
       'estado':'estado','c.p.':'cp','cp':'cp','imputado':'imputado',
       'adscripcion':'adscripcion','autoridad':'autoridad','tipo de delito':'tipo_delito',
       'parentesco':'parentesco','permanencia':'permanencia','notas':'notas',
-      'numero de carpeta':'numero_carpeta','folio cad':'folio_cad'
+      'numero de carpeta':'numero_carpeta','folio cad':'folio_cad',
+      'folio de carpeta':'numero_carpeta'
     };
     var inputs = modal.querySelectorAll('input, select, textarea');
     inputs.forEach(function(inp){
-      // Buscar la etiqueta que está arriba del input
       var cont = inp.parentElement;
       var texto = cont ? cont.innerText.split('\n')[0].toLowerCase().trim() : '';
-      // Normalizar
       texto = texto.replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u');
       var clave = mapa[texto];
       if(clave && d[clave] !== undefined && d[clave] !== null) inp.value = d[clave];
-      // También intentar por id
       if(inp.id){
         var k = inp.id.replace('m_','').replace('edit_','').replace('e_','');
         if(d[k] !== undefined && d[k] !== null) inp.value = d[k];
       }
     });
-    console.log('LLENADO CON', folio, d);
+    console.log('EDITANDO', folioSeleccionado, d);
   }).catch(function(err){ alert('Error: ' + err); });
 }, true);
 </script>
