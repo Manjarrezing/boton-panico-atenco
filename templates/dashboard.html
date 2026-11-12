@@ -515,14 +515,14 @@ document.addEventListener('click', function(e){
 </script>
 
   <script>
-function llenarFechasModal2(){
+setInterval(function(){
   var texto = document.body.innerText || '';
   function sacar(palabra){
     var desde = 0;
     while(true){
       var i = texto.indexOf(palabra, desde);
       if(i === -1) return '';
-      var pedazo = texto.substring(i, i+150);
+      var pedazo = texto.substring(i, i+200);
       var m = pedazo.match(/\d{4}-\d{2}-\d{2}/);
       if(m) return m[0];
       desde = i + palabra.length;
@@ -531,24 +531,17 @@ function llenarFechasModal2(){
   var vInicio = sacar('Inicio medida');
   var vEntrega = sacar('Fecha entrega pulsera');
   var vFin = sacar('Fecha fin');
-  // Buscar solo los inputs de fecha que sí se ven en el modal
+  if(!vInicio && !vEntrega && !vFin) return;
   var todos = [];
   document.querySelectorAll('input[type="date"]').forEach(function(inp){
     if(inp.offsetParent) todos.push(inp);
   });
-  // Si hay 3 visibles son Inicio, Entrega, Fin. Si hay 4, el 1ro es Nacimiento y los 3 últimos son los nuestros
   var lista = todos.length >= 4 ? todos.slice(-3) : todos;
   if(lista.length === 3){
-    if(vInicio) lista[0].value = vInicio;
-    if(vEntrega) lista[1].value = vEntrega;
-    if(vFin) lista[2].value = vFin;
+    if(vInicio && !lista[0].value) lista[0].value = vInicio;
+    if(vEntrega && !lista[1].value) lista[1].value = vEntrega;
+    if(vFin && !lista[2].value) lista[2].value = vFin;
   }
-}
-document.addEventListener('click', function(e){
-  if(e.target && e.target.textContent && e.target.textContent.indexOf('Editar datos') !== -1){
-    setTimeout(llenarFechasModal2, 500);
-    setTimeout(llenarFechasModal2, 1200);
-  }
-});
+}, 1000);
 </script>
- </body></html>
+</body></html>
