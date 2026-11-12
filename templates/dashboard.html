@@ -501,4 +501,70 @@ document.addEventListener('click', function(e){
   });
 }, true);
 </script>
+  <script>
+// ARREGLO FECHAS - por titulo, no por id
+function buscarInputFecha(titulo){
+  var todos = document.querySelectorAll('label, div, span, p, b');
+  for(var i=0;i<todos.length;i++){
+    if(todos[i].textContent.trim() === titulo){
+      var padre = todos[i].parentElement;
+      if(!padre) continue;
+      var inp = padre.querySelector('input[type="date"]');
+      if(inp) return inp;
+      // Si no esta en el mismo padre, busca en el hermano siguiente
+      var hermano = todos[i].nextElementSibling;
+      if(hermano && hermano.querySelector) {
+        var inp2 = hermano.querySelector('input[type="date"]');
+        if(inp2) return inp2;
+      }
+    }
+  }
+  return null;
+}
+
+function llenarFechasEnEditar(){
+  // Leer lo que dice el morado
+  var textoMorado = document.body.innerText || '';
+  function sacarFecha(palabra){
+    var idx = textoMorado.indexOf(palabra);
+    if(idx === -1) return '';
+    var pedazo = textoMorado.substring(idx, idx + 60);
+    var m = pedazo.match(/\d{4}-\d{2}-\d{2}/);
+    return m ? m[0] : '';
+  }
+  var fInicio = buscarInputFecha('Inicio medida');
+  var fEntrega = buscarInputFecha('Fecha entrega pulsera');
+  var fFin = buscarInputFecha('Fecha fin');
+  if(fInicio && !fInicio.value) { var v = sacarFecha('Inicio medida'); if(v) fInicio.value = v; }
+  if(fEntrega && !fEntrega.value) { var v2 = sacarFecha('Fecha entrega pulsera'); if(v2) fEntrega.value = v2; }
+  if(fFin && !fFin.value) { var v3 = sacarFecha('Fecha fin'); if(v3) fFin.value = v3; }
+}
+
+// Cuando abran Editar, intentar llenar 3 veces
+document.addEventListener('click', function(e){
+  if(e.target && e.target.textContent && (e.target.textContent.includes('Editar') || e.target.textContent.includes('Editar datos'))){
+    setTimeout(llenarFechasEnEditar, 500);
+    setTimeout(llenarFechasEnEditar, 1200);
+    setTimeout(llenarFechasEnEditar, 2000);
+  }
+});
+
+// Cuando guarden, meter las 3 fechas en lo que se manda al servidor
+var fetchOriginal = window.fetch;
+window.fetch = function(url, opciones){
+  try{
+    if(url && url.toString().includes('/api/actualizar') && opciones && opciones.body){
+      var datos = JSON.parse(opciones.body);
+      var fI = buscarInputFecha('Inicio medida');
+      var fE = buscarInputFecha('Fecha entrega pulsera');
+      var fF = buscarInputFecha('Fecha fin');
+      if(fI && fI.value) datos['inicio_medida'] = fI.value;
+      if(fE && fE.value) datos['fecha_entrega'] = fE.value;
+      if(fF && fF.value) datos['fecha_fin'] = fF.value;
+      opciones.body = JSON.stringify(datos);
+    }
+  }catch(err){}
+  return fetchOriginal.apply(this, arguments);
+};
+</script>
 </body></html>
