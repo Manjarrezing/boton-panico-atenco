@@ -73,10 +73,9 @@ def login_admin():
 def logout():
     session.clear()
     return redirect('/login')
-    @app.route('/api/quien_soy')
+@app.route('/api/quien_soy')
 def quien_soy():
     return jsonify({'usuario': session.get('admin', '')})
-    
 @app.route('/buscar')
 def buscar():
     return send_from_directory('templates', 'buscar.html')
