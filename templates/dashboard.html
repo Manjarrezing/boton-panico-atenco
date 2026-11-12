@@ -255,4 +255,38 @@ document.addEventListener('click', function(e){
 });
 </script>
 
-</body></html>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  // Buscar la tabla de Últimos alertamientos
+  var tablas = document.querySelectorAll('table');
+  tablas.forEach(function(tabla){
+    var filas = tabla.querySelectorAll('tbody tr');
+    if(filas.length === 0) filas = tabla.querySelectorAll('tr');
+    filas.forEach(function(fila){
+      // Saltar la fila de títulos
+      if(fila.querySelector('th')) return;
+      fila.style.cursor = 'pointer';
+      fila.title = 'Doble clic para editar';
+      fila.addEventListener('dblclick', function(){
+        var folio = fila.cells[0] ? fila.cells[0].innerText.trim() : '';
+        if(!folio){ alert('No encontré el folio en esta fila'); return; }
+        alert('Abriendo para editar: ' + folio);
+        window.folioAEditar = folio;
+        // Intentar con las funciones que ya existen
+        try{
+          if(typeof abrirEditar === 'function') return abrirEditar(folio);
+          if(typeof editarRegistro === 'function') return editarRegistro(folio);
+          if(typeof editarDatos === 'function') return editarDatos(folio);
+          if(typeof mostrarEditar === 'function') return mostrarEditar(folio);
+        }catch(e){ alert('Error al abrir: ' + e); }
+        // Si no hay función, abrir el modal a mano y poner el folio
+        var modal = document.getElementById('modalEditar') || document.querySelector('[id*="Editar"]');
+        var inputFolio = document.getElementById('m_folio');
+        if(inputFolio) inputFolio.value = folio;
+        if(modal){ modal.style.display = 'block'; modal.classList.remove('hidden'); }
+        else { alert('No encontré el modal, pero el folio es: ' + folio); }
+      });
+    });
+  });
+});
+</script></body></html>
