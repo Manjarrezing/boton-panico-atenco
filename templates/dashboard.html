@@ -178,6 +178,14 @@ if(elFin && elFin.value) datos['fecha_fin'] = elFin.value;
       datos.foto = window.fotoActual;
     }
     if(!datos.folio){ alert('Falta el Folio'); return; }
+    
+    var _ent = document.getElementById('m_fecha_entrega') || document.getElementById('mEntrega') || document.getElementById('e_fecha_entrega') || document.getElementById('eEntrega');
+if(_ent && _ent.value) datos['fecha_entrega'] = _ent.value;
+var _fin = document.getElementById('m_fecha_fin') || document.getElementById('mFin') || document.getElementById('e_fecha_fin') || document.getElementById('eFin');
+if(_fin && _fin.value) datos['fecha_fin'] = _fin.value;
+var _ini = document.getElementById('m_inicio_medida') || document.getElementById('mInicio') || document.getElementById('e_inicio_medida') || document.getElementById('eInicio');
+if(_ini && _ini.value) datos['inicio_medida'] = _ini.value;
+    
     var r = await fetch('/api/actualizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(datos)});
     var txt = await r.text();
     if(r.ok){ alert('✅ Guardado'); location.reload(); }
