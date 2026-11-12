@@ -521,21 +521,25 @@ document.addEventListener('click', function(e){
 <script>
 var _vigDesde = 0;
 setInterval(function(){
-  // --- 1. FECHAS ---
+  // --- 1. FECHAS - con los nombres REALES de tu app ---
   var texto = document.body.innerText || '';
   function sacar(palabra){
     var desde = 0;
     while(true){
       var i = texto.indexOf(palabra, desde);
       if(i === -1) return '';
-      var pedazo = texto.substring(i, i+200);
-      var m = pedazo.match(/\d{4}-\d{2}-\d{2}/);
-      if(m) return m[0];
+      var pedazo = texto.substring(i, i+250);
+      // Busca 2026-11-12
+      var m1 = pedazo.match(/\d{4}-\d{2}-\d{2}/);
+      if(m1) return m1[0];
+      // Busca 12/11/2026 y lo convierte a 2026-11-12
+      var m2 = pedazo.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+      if(m2) return m2[3] + '-' + m2[2] + '-' + m2[1];
       desde = i + palabra.length;
     }
   }
   var vInicio = sacar('Inicio medida');
-  var vEntrega = sacar('Fecha entrega pulsera');
+  var vEntrega = sacar('Fecha de Instalación');
   var vFin = sacar('Fecha fin');
   var todos = [];
   document.querySelectorAll('input[type="date"]').forEach(function(inp){
@@ -554,7 +558,7 @@ setInterval(function(){
   } else {
     _vigDesde = 0;
   }
-  // --- 2. EDITAR MUNICIPIO / ESTADO POR FILA ---
+  // --- 2. EDITAR MUNICIPIO / ESTADO ---
   document.querySelectorAll('input').forEach(function(inp){
     if(!inp.offsetParent) return;
     if(inp.value) return;
@@ -580,17 +584,21 @@ setInterval(function(){
       }
     }
   });
-  // --- 3. PRINCIPAL ---
-  document.querySelectorAll('div, span, p').forEach(function(el){
-    if(el.querySelector('input')) return;
-    if(el.children.length > 0) return;
-    var t = (el.textContent || '').trim();
-    if(t === 'Municipio:'){
-      el.textContent = 'Municipio: Xonacatlán';
-    }
-    if(t === 'Estado:'){
-      el.textContent = 'Estado: Estado de México';
-    }
+  // --- 3. PRINCIPAL - busca el bloque que tiene Direccion + C.P. juntos ---
+  document.querySelectorAll('div').forEach(function(div){
+    if(div.querySelector('input')) return;
+    var h = div.innerHTML || '';
+    if(h.indexOf('Municipio:') === -1) return;
+    if(h.indexOf('C.P.:') === -1) return;
+    if(h.length > 2000) return;
+    var nuevo = h;
+    nuevo = nuevo.replace(/Municipio:\s*(<br[^>]*>|\s)*Estado:/g, 'Municipio: Xonacatlán<br>Estado:');
+    nuevo = nuevo.replace(/Estado:\s*(<br[^>]*>|\s)*C\.P\.:/g, 'Estado: Estado de México<br>C.P.:');
+    nuevo = nuevo.replace(/Municipio:\s*<br[^>]*>/g, 'Municipio: Xonacatlán<br>');
+    nuevo = nuevo.replace(/Estado:\s*<br[^>]*>/g, 'Estado: Estado de México<br>');
+    // Si sigue vacío, por si está en divs separados
+    nuevo = nuevo.replace(/Municipio:\s*<\/div>\s*<div[^>]*>\s*<\/div>/g, 'Municipio: Xonacatlán</div><div>Estado:');
+    if(nuevo !== h) div.innerHTML = nuevo;
   });
 }, 800);
 </script>
