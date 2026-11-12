@@ -516,24 +516,10 @@ document.addEventListener('click', function(e){
     else console.log('NO ENCONTRE FOTO PARA', folio);
   });
 }, true);
-<script>
-var _vigDesde = 0;
+
+  <script>
 setInterval(function(){
-  // --- 1. FECHAS - si está en "-" pone HOY ---
-  var texto = document.body.innerText || '';
-  function sacar(palabra){
-    var desde = 0;
-    while(true){
-      var i = texto.indexOf(palabra, desde);
-      if(i === -1) return '';
-      var pedazo = texto.substring(i, i+250);
-      var m1 = pedazo.match(/\d{4}-\d{2}-\d{2}/);
-      if(m1) return m1[0];
-      var m2 = pedazo.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-      if(m2) return m2[3] + '-' + m2[2] + '-' + m2[1];
-      desde = i + palabra.length;
-    }
-  }
+  // --- 1. FECHAS - sin límite de tiempo, siempre intenta ---
   function hoyISO(){
     var d = new Date();
     var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
@@ -547,73 +533,88 @@ setInterval(function(){
     var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
     return d.getFullYear() + '-' + m + '-' + dia;
   }
-  // Duración: "3 meses"
+  function ponerValor(inp, valor){
+    // Truco para React: usa el setter nativo
+    var proto = window.HTMLInputElement.prototype;
+    var desc = Object.getOwnPropertyDescriptor(proto, 'value');
+    if(desc && desc.set) desc.set.call(inp, valor);
+    else inp.value = valor;
+    inp.dispatchEvent(new Event('input', {bubbles:true}));
+    inp.dispatchEvent(new Event('change', {bubbles:true}));
+    inp.dispatchEvent(new Event('blur', {bubbles:true}));
+  }
+  var texto = document.body.innerText || '';
   var meses = 3;
   var md = texto.match(/Duración:\s*(\d+)/);
   if(md) meses = parseInt(md[1]);
-  var vInicio = sacar('Inicio medida');
-  var vEntrega = sacar('Fecha entrega pulsera');
-  if(!vEntrega) vEntrega = sacar('Fecha de Instalación');
-  var vFin = sacar('Fecha fin');
-  // Si no hay fecha, usa HOY
-  if(!vInicio) vInicio = hoyISO();
-  if(!vEntrega) vEntrega = hoyISO();
-  if(!vFin) vFin = sumarMeses(vInicio, meses);
-  var todos = [];
-  document.querySelectorAll('input[type="date"]').forEach(function(inp){
-    if(inp.offsetParent) todos.push(inp);
-  });
-  if(todos.length >= 3){
-    if(!_vigDesde) _vigDesde = Date.now();
-    if(Date.now() - _vigDesde <= 4000){
-      var lista = todos.length >= 4 ? todos.slice(-3) : todos;
-      if(lista.length === 3){
-        if(!lista[0].value) lista[0].value = vInicio;
-        if(!lista[1].value) lista[1].value = vEntrega;
-        if(!lista[2].value) lista[2].value = vFin;
-      }
-    }
-  } else {
-    _vigDesde = 0;
+  var vInicio = hoyISO();
+  var vEntrega = hoyISO();
+  var vFin = sumarMeses(vInicio, meses);
+  // Si ya hay fecha real en la morada (no "-"), úsala en vez de hoy
+  function sacar(palabra){
+    var i = texto.indexOf(palabra);
+    if(i === -1) return '';
+    var pedazo = texto.substring(i, i+250);
+    var m1 = pedazo.match(/\d{4}-\d{2}-\d{2}/);
+    if(m1) return m1[0];
+    var m2 = pedazo.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    if(m2) return m2[3] + '-' + m2[2] + '-' + m2[1];
+    return '';
   }
-  // --- 2. EDITAR MUNICIPIO / ESTADO (igual que antes, ya jala) ---
+  var f1 = sacar('Inicio medida');
+  var f2 = sacar('Fecha entrega pulsera') || sacar('Fecha de Instalación');
+  var f3 = sacar('Fecha fin');
+  if(f1) vInicio = f1;
+  if(f2) vEntrega = f2;
+  if(f3) vFin = f3;
+  if(!f3 && f1) vFin = sumarMeses(vInicio, meses);
+  // Llena los 3 date inputs por ORDEN, sin importar el nombre
+  var fechas = [];
+  document.querySelectorAll('input[type="date"]').forEach(function(inp){
+    if(inp.offsetParent) fechas.push(inp);
+  });
+  if(fechas.length >= 3){
+    var lista = fechas.length >= 4 ? fechas.slice(-3) : fechas;
+    if(!lista[0].value) ponerValor(lista[0], vInicio);
+    if(!lista[1].value) ponerValor(lista[1], vEntrega);
+    if(!lista[2].value) ponerValor(lista[2], vFin);
+  }
+  // --- 2. MUNICIPIO / ESTADO EN EDITAR ---
   document.querySelectorAll('input').forEach(function(inp){
     if(!inp.offsetParent) return;
     if(inp.value) return;
     if(inp.type === 'date') return;
     var a = inp;
-    for(var i=0; i<5; i++){
+    for(var i=0; i<6; i++){
       a = a.parentElement;
       if(!a) break;
       if(a.querySelectorAll('input').length === 1){
         var t = a.textContent || '';
-        if(t.indexOf('Municipio:') !== -1){
-          inp.value = 'Xonacatlán';
-          inp.dispatchEvent(new Event('input', {bubbles:true}));
-          inp.dispatchEvent(new Event('change', {bubbles:true}));
-          break;
-        }
-        if(t.indexOf('Estado:') !== -1){
-          inp.value = 'Estado de México';
-          inp.dispatchEvent(new Event('input', {bubbles:true}));
-          inp.dispatchEvent(new Event('change', {bubbles:true}));
-          break;
-        }
+        if(t.indexOf('Municipio:') !== -1){ ponerValor(inp, 'Xonacatlán'); break; }
+        if(t.indexOf('Estado:') !== -1){ ponerValor(inp, 'Estado de México'); break; }
       }
     }
+    // Si no lo encontró por fila, busca por la etiqueta de arriba
+    if(!inp.value){
+      var prev = inp.parentElement ? inp.parentElement.previousElementSibling : null;
+      if(prev && prev.textContent.indexOf('Municipio') !== -1) ponerValor(inp, 'Xonacatlán');
+      if(prev && prev.textContent.indexOf('Estado') !== -1) ponerValor(inp, 'Estado de México');
+    }
   });
-  // --- 3. PRINCIPAL MUNICIPIO / ESTADO (igual que antes, ya jala) ---
+  // --- 3. PRINCIPAL ---
   document.querySelectorAll('div').forEach(function(div){
     if(div.querySelector('input')) return;
     var h = div.innerHTML || '';
     if(h.indexOf('Municipio:') === -1) return;
     if(h.indexOf('C.P.:') === -1) return;
-    if(h.length > 2000) return;
+    if(h.length > 3000) return;
     var nuevo = h;
     nuevo = nuevo.replace(/Municipio:\s*(<br[^>]*>|\s)*Estado:/g, 'Municipio: Xonacatlán<br>Estado:');
     nuevo = nuevo.replace(/Estado:\s*(<br[^>]*>|\s)*C\.P\.:/g, 'Estado: Estado de México<br>C.P.:');
     nuevo = nuevo.replace(/Municipio:\s*<br[^>]*>/g, 'Municipio: Xonacatlán<br>');
     nuevo = nuevo.replace(/Estado:\s*<br[^>]*>/g, 'Estado: Estado de México<br>');
+    nuevo = nuevo.replace(/Municipio:\s*<\/div>/g, 'Municipio: Xonacatlán</div>');
+    nuevo = nuevo.replace(/Estado:\s*<\/div>/g, 'Estado: Estado de México</div>');
     if(nuevo !== h) div.innerHTML = nuevo;
   });
 }, 800);
