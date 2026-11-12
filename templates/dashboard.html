@@ -395,23 +395,54 @@ document.addEventListener('click', function(e){
     });
   }, 500);
 }, true);
-  // v8 - FORZAR FOTO EN EL MORADO
-function ponerFotoMorado(foto){
-  if(!foto) return;
-  // Buscar el contenedor que dice ULTIMO ALERTAMIENTO
-  var panel = Array.from(document.querySelectorAll('div')).find(function(d){
-    return d.innerText && d.innerText.includes('ULTIMO ALERTAMIENTO');
-  });
-  if(panel){
-    // Buscar la img dentro de ese panel o de su papá
-    var img = panel.querySelector('img') || (panel.parentElement ? panel.parentElement.querySelector('img') : null);
-    if(img){ img.src = foto; console.log('FOTO MORADO CAMBIADA'); return; }
-  }
-  // Si no lo encontró, cambiar la imagen circular de la derecha
-  document.querySelectorAll('img').forEach(function(im){
-    if(im.width > 50 && im.width < 250 && im.src.includes('http')) im.src = foto;
+ // v9 - MORADO: copiar foto de USUARIOS, no de alertas
+let fotoActualMorado = null;
+
+function buscarFotoUsuario(folio){
+  var urls = ['/api/usuarios', '/api/registros', '/api/personas', '/api/alertas', '/api/buscar?folio=' + folio, '/api/usuarios?folio=' + folio];
+  return Promise.all(urls.map(function(u){
+    return fetch(u).then(function(r){ return r.json(); }).catch(function(){ return null; });
+  })).then(function(results){
+    for(var i=0;i<results.length;i++){
+      var j = results[i];
+      if(!j) continue;
+      var list = Array.isArray(j) ? j : (j.usuarios || j.registros || j.personas || j.alertas || j.data || j.resultados || []);
+      if(!Array.isArray(list)) continue;
+      var d = list.find(function(x){ return (x.folio + '').trim() === folio || (x.folio_cad + '').trim() === folio; });
+      if(d){
+        // Buscar cualquier campo que parezca foto
+        for(var k in d){
+          var v = d[k];
+          if(typeof v === 'string' && (v.startsWith('data:image') || v.includes('.jpg') || v.includes('.png') || v.includes('foto')) && v.length > 50){
+            return v;
+          }
+        }
+        if(d.foto) return d.foto;
+        if(d.foto_persona) return d.foto_persona;
+        if(d.imagen) return d.imagen;
+      }
+    }
+    return null;
   });
 }
+
+function forzarFotoMorado(){
+  if(!fotoActualMorado) return;
+  // El morado es el div de la derecha, el que tiene el círculo
+  var imgs = document.querySelectorAll('img');
+  imgs.forEach(function(im){
+    // La foto del morado es circular y está a la derecha
+    var r = im.getBoundingClientRect();
+    if(r.left > window.innerWidth * 0.6 && r.width > 60 && r.width < 300){
+      if(im.src !== fotoActualMorado) im.src = fotoActualMorado;
+    }
+  });
+}
+
+// Vigilar siempre: si el mostrar() vuelve a poner la mujer, la volvemos a cambiar
+var obs = new MutationObserver(function(){ forzarFotoMorado(); });
+obs.observe(document.body, { attributes: true, childList: true, subtree: true, attributeFilter: ['src'] });
+setInterval(forzarFotoMorado, 1000);
 
 document.addEventListener('click', function(e){
   var fila = e.target.closest ? e.target.closest('tr') : null;
@@ -421,26 +452,10 @@ document.addEventListener('click', function(e){
   if(celdas.length === 0) return;
   var folio = celdas[0].innerText.trim();
   if(!folio || folio === 'Folio') return;
-  // Esperar a que el morado termine de cargar su foto vieja, y luego pisarla
-  setTimeout(function(){
-    fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(j){
-      var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []);
-      var d = list.find(function(x){ return (x.folio + '').trim() === folio; });
-      if(!d) return;
-      var foto = d.foto || d.foto_persona || d.imagen || d.foto_url;
-      if(foto) ponerFotoMorado(foto);
-    });
-  }, 1000);
-  // Y otra vez a los 2 segundos, por si el mostrar() la vuelve a cambiar
-  setTimeout(function(){
-    fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(j){
-      var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []);
-      var d = list.find(function(x){ return (x.folio + '').trim() === folio; });
-      if(!d) return;
-      var foto = d.foto || d.foto_persona || d.imagen || d.foto_url;
-      if(foto) ponerFotoMorado(foto);
-    });
-  }, 2000);
+  buscarFotoUsuario(folio).then(function(foto){
+    if(foto){ fotoActualMorado = foto; forzarFotoMorado(); console.log('FOTO MORADO PARA', folio, 'encontrada'); }
+    else console.log('NO ENCONTRE FOTO PARA', folio);
+  });
 }, true);
 </script>
 </body></html>
