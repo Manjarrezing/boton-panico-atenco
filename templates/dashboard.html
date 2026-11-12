@@ -255,7 +255,7 @@ document.addEventListener('click', function(e){
 });
 </script>
 <script>
-// DOBLE CLIC v4 - sin alert, llena aunque los ids sean distintos
+// DOBLE CLIC v5 - NO usa el botón amarillo, abre y llena directo
 document.addEventListener('dblclick', function(e){
   var fila = e.target.closest ? e.target.closest('tr') : null;
   if(!fila) return;
@@ -264,30 +264,56 @@ document.addEventListener('dblclick', function(e){
   if(celdas.length === 0) return;
   var folio = celdas[0].innerText.trim();
   if(!folio || folio === 'Folio') return;
+  e.preventDefault();
+  e.stopPropagation();
 
   fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(j){
     var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []);
-    var d = list.find(function(x){ return (x.folio + '') === folio; });
+    var d = list.find(function(x){ return (x.folio + '').trim() === folio; });
     if(!d){ alert('No encontré datos para: ' + folio); return; }
-    console.log('DATOS ENCONTRADOS PARA', folio, d);
-    // Abrir el modal con el botón amarillo
-    var btnEditar = Array.from(document.querySelectorAll('button')).find(function(b){ return b.innerText.includes('Editar'); });
-    if(btnEditar) btnEditar.click();
-    // Llenar con 800ms, para que no lo borre el que abre el modal
-    setTimeout(function(){
-      Object.keys(d).forEach(function(k){
-        var valor = d[k];
-        if(valor === null || valor === undefined) return;
-        var input = document.getElementById('m_' + k) ||
-                    document.getElementById('edit_' + k) ||
-                    document.getElementById('e_' + k) ||
-                    document.getElementById(k);
-        if(input) input.value = valor;
+
+    // 1. Poner este registro como el actual, para que Guardar no se confunda
+    window.actual = d;
+    try{ actual = d; }catch(err){}
+
+    // 2. Encontrar el modal de Editar datos SIN picarle al botón
+    var modal = document.getElementById('modalEditar') ||
+      Array.from(document.querySelectorAll('div')).find(function(div){
+        return div.innerText.includes('Editar datos') && div.querySelector('input');
       });
-      var f = document.getElementById('m_folio') || document.getElementById('edit_folio') || document.getElementById('folio');
-      if(f && !f.value) f.value = folio;
-    }, 800);
-  }).catch(function(err){ alert('Error buscando datos: ' + err); });
-});
+    if(!modal){ alert('No encontré el modal'); return; }
+    modal.style.display = 'block';
+    modal.classList.remove('hidden');
+    modal.style.visibility = 'visible';
+
+    // 3. Llenar por ETIQUETA, no por id, porque los ids no son m_
+    var mapa = {
+      'folio':'folio','nombres':'nombres','apellidos':'apellidos','mac':'mac',
+      'edad':'edad','celular':'celular','otro telefono':'otro_telefono',
+      'hijos':'hijos','calle':'calle','numero':'numero','entre calles':'entre_calles',
+      'referencia':'referencia','localidad':'localidad','municipio':'municipio',
+      'estado':'estado','c.p.':'cp','cp':'cp','imputado':'imputado',
+      'adscripcion':'adscripcion','autoridad':'autoridad','tipo de delito':'tipo_delito',
+      'parentesco':'parentesco','permanencia':'permanencia','notas':'notas',
+      'numero de carpeta':'numero_carpeta','folio cad':'folio_cad'
+    };
+    var inputs = modal.querySelectorAll('input, select, textarea');
+    inputs.forEach(function(inp){
+      // Buscar la etiqueta que está arriba del input
+      var cont = inp.parentElement;
+      var texto = cont ? cont.innerText.split('\n')[0].toLowerCase().trim() : '';
+      // Normalizar
+      texto = texto.replace('á','a').replace('é','e').replace('í','i').replace('ó','o').replace('ú','u');
+      var clave = mapa[texto];
+      if(clave && d[clave] !== undefined && d[clave] !== null) inp.value = d[clave];
+      // También intentar por id
+      if(inp.id){
+        var k = inp.id.replace('m_','').replace('edit_','').replace('e_','');
+        if(d[k] !== undefined && d[k] !== null) inp.value = d[k];
+      }
+    });
+    console.log('LLENADO CON', folio, d);
+  }).catch(function(err){ alert('Error: ' + err); });
+}, true);
 </script>
 </body></html>
