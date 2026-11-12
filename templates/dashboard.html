@@ -205,7 +205,16 @@ function mostrar(d){
   document.getElementById('ultNombre').innerText=(d.nombres||'')+' '+(d.apellidos||'');
   document.getElementById('ultFecha').innerText=d.fecha||'';
   document.getElementById('rNombre').innerText=(d.nombres||'')+' '+(d.apellidos||'');
-  document.getElementById('fotoMorado').src=d.foto||'https://i.pravatar.cc/300?img=47';
+  document.getElementById('fotoMorado').src = d.foto || 'https://i.pravatar.cc/300?img=47';
+if(!d.foto){
+  fetch('/api/usuarios').then(function(r){return r.json();}).then(function(j){
+    var list = Array.isArray(j)?j:(j.usuarios||j.data||[]);
+    var u = list.find(function(x){ return (x.folio+'')===(d.folio+'') || ((x.nombres+' '+x.apellidos).trim()===(d.nombres+' '+d.apellidos).trim()); });
+    if(u && (u.foto || u.foto_persona || u.imagen)){
+      document.getElementById('fotoMorado').src = u.foto || u.foto_persona || u.imagen;
+    }
+  }).catch(function(){});
+}
   document.getElementById('rMac').innerText=d.mac||'-'; document.getElementById('rEdad').innerText=d.edad||'-';
   document.getElementById('rCel').innerText=d.celular||'-'; document.getElementById('rOtro').innerText=d.otro||'-';
   document.getElementById('rHijos').innerText=d.hijos??'-'; document.getElementById('rNotas').innerText=d.notas||'-';
