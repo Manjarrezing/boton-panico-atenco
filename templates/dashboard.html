@@ -519,16 +519,21 @@ document.addEventListener('click', function(e){
 
 </script>
 
- <script>
+<script>
 setInterval(function(){
   function f(d){ var m=''+(d.getMonth()+1); if(m.length==1)m='0'+m; var a=''+d.getDate(); if(a.length==1)a='0'+a; return a+'/'+m+'/'+d.getFullYear(); }
   function fISO(d){ var m=''+(d.getMonth()+1); if(m.length==1)m='0'+m; var a=''+d.getDate(); if(a.length==1)a='0'+a; return d.getFullYear()+'-'+m+'-'+a; }
-  function poner(inp,val){ var p=window.HTMLInputElement.prototype; var desc=Object.getOwnPropertyDescriptor(p,'value'); if(desc&&desc.set)desc.set.call(inp,val); else inp.value=val; inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); }
+  function poner(inp,val){ try{ var p=window.HTMLInputElement.prototype; var desc=Object.getOwnPropertyDescriptor(p,'value'); if(desc&&desc.set)desc.set.call(inp,val); else inp.value=val; }catch(e){ inp.value=val; } inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); }
   var hoy=new Date(); var fin=new Date(); fin.setMonth(fin.getMonth()+3);
   var fechas=[]; document.querySelectorAll('input[type="date"]').forEach(function(i){ if(i.offsetParent) fechas.push(i); });
   if(fechas.length>=3){ var l=fechas.length>=4?fechas.slice(-3):fechas; if(!l[0].value) poner(l[0],fISO(hoy)); if(!l[1].value) poner(l[1],fISO(hoy)); if(!l[2].value) poner(l[2],fISO(fin)); }
-  document.querySelectorAll('div').forEach(function(div){ if(div.querySelector('input'))return; var h=div.innerHTML||''; if(h.indexOf('Inicio medida')==-1)return; if(h.indexOf('Fecha fin')==-1)return; if(h.length>4000)return; var n=h.replace(/Inicio medida:\s*-/g,'Inicio medida: '+f(hoy)).replace(/Fecha entrega pulsera:\s*-/g,'Fecha entrega pulsera: '+f(hoy)).replace(/Fecha fin:\s*-/g,'Fecha fin: '+f(fin)); if(n!==h)div.innerHTML=n; });
+  document.querySelectorAll('div, p, span, li').forEach(function(el){
+    if(el.querySelector('div, p, span')) return;
+    var t=el.textContent||'';
+    if(t.indexOf('Inicio medida:')>-1 && t.trim().endsWith('-')) el.textContent='Inicio medida: '+f(hoy);
+    if(t.indexOf('Fecha entrega pulsera:')>-1 && t.trim().endsWith('-')) el.textContent='Fecha entrega pulsera: '+f(hoy);
+    if(t.indexOf('Fecha fin:')>-1 && t.trim().endsWith('-')) el.textContent='Fecha fin: '+f(fin);
+  });
 },800);
 </script>
-  
 </body></html>
