@@ -395,5 +395,52 @@ document.addEventListener('click', function(e){
     });
   }, 500);
 }, true);
+  // v8 - FORZAR FOTO EN EL MORADO
+function ponerFotoMorado(foto){
+  if(!foto) return;
+  // Buscar el contenedor que dice ULTIMO ALERTAMIENTO
+  var panel = Array.from(document.querySelectorAll('div')).find(function(d){
+    return d.innerText && d.innerText.includes('ULTIMO ALERTAMIENTO');
+  });
+  if(panel){
+    // Buscar la img dentro de ese panel o de su papá
+    var img = panel.querySelector('img') || (panel.parentElement ? panel.parentElement.querySelector('img') : null);
+    if(img){ img.src = foto; console.log('FOTO MORADO CAMBIADA'); return; }
+  }
+  // Si no lo encontró, cambiar la imagen circular de la derecha
+  document.querySelectorAll('img').forEach(function(im){
+    if(im.width > 50 && im.width < 250 && im.src.includes('http')) im.src = foto;
+  });
+}
+
+document.addEventListener('click', function(e){
+  var fila = e.target.closest ? e.target.closest('tr') : null;
+  if(!fila) return;
+  if(fila.querySelector('th')) return;
+  var celdas = fila.querySelectorAll('td');
+  if(celdas.length === 0) return;
+  var folio = celdas[0].innerText.trim();
+  if(!folio || folio === 'Folio') return;
+  // Esperar a que el morado termine de cargar su foto vieja, y luego pisarla
+  setTimeout(function(){
+    fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(j){
+      var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []);
+      var d = list.find(function(x){ return (x.folio + '').trim() === folio; });
+      if(!d) return;
+      var foto = d.foto || d.foto_persona || d.imagen || d.foto_url;
+      if(foto) ponerFotoMorado(foto);
+    });
+  }, 1000);
+  // Y otra vez a los 2 segundos, por si el mostrar() la vuelve a cambiar
+  setTimeout(function(){
+    fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(j){
+      var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []);
+      var d = list.find(function(x){ return (x.folio + '').trim() === folio; });
+      if(!d) return;
+      var foto = d.foto || d.foto_persona || d.imagen || d.foto_url;
+      if(foto) ponerFotoMorado(foto);
+    });
+  }, 2000);
+}, true);
 </script>
 </body></html>
