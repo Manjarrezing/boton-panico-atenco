@@ -443,7 +443,8 @@ function buscarFotoUsuario(folio){
     return null;
   });
 }
-
+window.alert = function(){};
+window.confirm = function(){ return true; };
 function forzarFotoMorado(){
   if(!fotoActualMorado) return;
   // El morado es el div de la derecha, el que tiene el círculo
