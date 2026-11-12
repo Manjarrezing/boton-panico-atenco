@@ -328,5 +328,72 @@ document.addEventListener('click', function(e){
     console.log('EDITANDO', folioSeleccionado, d);
   }).catch(function(err){ alert('Error: ' + err); });
 }, true);
+  
+  // v7 - FOTO: guardar la foto de verdad y mostrarla en el morado
+let fotoNueva = null;
+
+// 1. Cuando escoges una foto en Editar, guardarla en memoria
+document.addEventListener('change', function(e){
+  if(e.target.type !== 'file') return;
+  var file = e.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    fotoNueva = reader.result; // base64
+    alert('Foto lista, tamaño ' + fotoNueva.length + ' - Ahora dale Guardar todo');
+    // Vista previa en el modal
+    var imgPrev = document.querySelector('#modalEditar img, div img');
+    if(imgPrev) imgPrev.src = fotoNueva;
+  };
+  reader.readAsDataURL(file);
+});
+
+// 2. Cuando le das Guardar todo, mandar también la foto
+document.addEventListener('click', function(e){
+  var btn = e.target.closest ? e.target.closest('button') : null;
+  if(!btn) return;
+  if(!btn.innerText.includes('Guardar')) return;
+  if(!folioSeleccionado) return;
+  // Dejar que guarde lo demás, y 500ms después mandar solo la foto
+  setTimeout(function(){
+    if(!fotoNueva) return;
+    fetch('/api/alertas/' + folioSeleccionado, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ foto: fotoNueva, foto_persona: fotoNueva, imagen: fotoNueva })
+    }).then(function(r){ return r.json().catch(function(){ return {}; }); }).then(function(){
+      console.log('FOTO GUARDADA PARA', folioSeleccionado);
+      // Actualizar el morado sin recargar
+      var imgMorado = document.querySelector('div[style*="purple"] img, img');
+      var imgs = document.querySelectorAll('img');
+      imgs.forEach(function(im){ 
+        if(im.src.includes('mujer') || im.closest('div')?.innerText?.includes('ULTIMO ALERTAMIENTO')) im.src = fotoNueva;
+      });
+      fotoNueva = null;
+      alert('Foto guardada para ' + folioSeleccionado);
+      location.reload();
+    }).catch(function(err){ alert('No se pudo guardar foto: ' + err); });
+  }, 800);
+}, true);
+
+// 3. Cuando seleccionas una fila, mostrar SU foto en el morado, no la de ejemplo
+document.addEventListener('click', function(e){
+  var fila = e.target.closest ? e.target.closest('tr') : null;
+  if(!fila) return;
+  setTimeout(function(){
+    if(!folioSeleccionado) return;
+    fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(j){
+      var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []);
+      var d = list.find(function(x){ return (x.folio + '').trim() === folioSeleccionado; });
+      if(!d) return;
+      var foto = d.foto || d.foto_persona || d.imagen || d.foto_url;
+      if(foto){
+        document.querySelectorAll('img').forEach(function(im){
+          if(im.closest('div')?.innerText?.includes('ULTIMO ALERTAMIENTO')) im.src = foto;
+        });
+      }
+    });
+  }, 500);
+}, true);
 </script>
 </body></html>
