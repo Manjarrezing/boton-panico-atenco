@@ -521,29 +521,29 @@ document.addEventListener('click', function(e){
 
 <script>
 setInterval(function(){
-  function f(d){ var m=''+(d.getMonth()+1); if(m.length==1)m='0'+m; var a=''+d.getDate(); if(a.length==1)a='0'+a; return a+'/'+m+'/'+d.getFullYear(); }
   function fISO(d){ var m=''+(d.getMonth()+1); if(m.length==1)m='0'+m; var a=''+d.getDate(); if(a.length==1)a='0'+a; return d.getFullYear()+'-'+m+'-'+a; }
   function aDMY(t){ return t.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$3/$2/$1'); }
   function poner(inp,val){ try{ var p=window.HTMLInputElement.prototype; var desc=Object.getOwnPropertyDescriptor(p,'value'); if(desc&&desc.set)desc.set.call(inp,val); else inp.value=val; }catch(e){ inp.value=val; } inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); }
   var hoy=new Date(); var fin=new Date(); fin.setMonth(fin.getMonth()+3);
   var fechas=[]; document.querySelectorAll('input[type="date"]').forEach(function(i){ if(i.offsetParent) fechas.push(i); });
   if(fechas.length>=3){ var l=fechas.length>=4?fechas.slice(-3):fechas; if(!l[0].value) poner(l[0],fISO(hoy)); if(!l[1].value) poner(l[1],fISO(hoy)); if(!l[2].value) poner(l[2],fISO(fin)); }
-  document.querySelectorAll('div, p, span, li').forEach(function(el){
-    if(el.querySelector('div, p, span')) return;
-    var t=el.textContent||'';
-    if(t.indexOf('Inicio medida:')>-1){
-      if(t.trim().endsWith('-')) el.textContent='Inicio medida: '+f(hoy);
-      else if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
-    }
-    if(t.indexOf('Fecha entrega pulsera:')>-1){
-      if(t.trim().endsWith('-')) el.textContent='Fecha entrega pulsera: '+f(hoy);
-      else if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
-    }
-    if(t.indexOf('Fecha fin:')>-1){
-      if(t.trim().endsWith('-')) el.textContent='Fecha fin: '+f(fin);
-      else if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
+  var panel=null;
+  document.querySelectorAll('div').forEach(function(d){
+    var t=d.textContent||'';
+    if(t.indexOf('Inicio medida:')>-1 && t.indexOf('Fecha fin:')>-1){
+      if(!panel || d.innerHTML.length < panel.innerHTML.length) panel=d;
     }
   });
+  if(panel){
+    panel.querySelectorAll('div, p, span, li, b, strong').forEach(function(el){
+      if(el.querySelector('div, p, span, li, b, strong')) return;
+      var t=el.textContent||'';
+      if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
+    });
+    if(/(\d{4})-(\d{2})-(\d{2})/.test(panel.textContent) && panel.children.length===0){
+      panel.textContent=aDMY(panel.textContent);
+    }
+  }
 },800);
 </script>
 </body></html>
