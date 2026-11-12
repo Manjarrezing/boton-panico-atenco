@@ -552,26 +552,48 @@ setInterval(function(){
     if(vEntrega && !lista[1].value) lista[1].value = vEntrega;
     if(vFin && !lista[2].value) lista[2].value = vFin;
   }
-
+<script>
 setInterval(function(){
-  // 1. LLENAR EDITAR - por etiqueta, no por ID
+  // 1. EDITAR - buscar por FILA, no por cuadrito
   document.querySelectorAll('input').forEach(function(inp){
     if(!inp.offsetParent) return;
     if(inp.value) return;
-    var cont = inp.closest('div');
-    if(!cont) return;
-    var t = (cont.textContent || '').trim();
-    if(t.indexOf('Municipio:') === 0){
-      inp.value = 'Xonacatlán';
-      inp.dispatchEvent(new Event('input', {bubbles:true}));
-      inp.dispatchEvent(new Event('change', {bubbles:true}));
-    }
-    if(t.indexOf('Estado:') === 0){
-      inp.value = 'Estado de México';
-      inp.dispatchEvent(new Event('input', {bubbles:true}));
-      inp.dispatchEvent(new Event('change', {bubbles:true}));
+    var a = inp;
+    for(var i=0; i<5; i++){
+      a = a.parentElement;
+      if(!a) break;
+      // La fila tiene SOLO este input y dice Municipio: o Estado:
+      if(a.querySelectorAll('input').length === 1){
+        var t = a.textContent || '';
+        if(t.indexOf('Municipio:') !== -1){
+          inp.value = 'Xonacatlán';
+          inp.dispatchEvent(new Event('input', {bubbles:true}));
+          inp.dispatchEvent(new Event('change', {bubbles:true}));
+          break;
+        }
+        if(t.indexOf('Estado:') !== -1){
+          inp.value = 'Estado de México';
+          inp.dispatchEvent(new Event('input', {bubbles:true}));
+          inp.dispatchEvent(new Event('change', {bubbles:true}));
+          break;
+        }
+      }
     }
   });
+  // 2. PRINCIPAL - buscar el renglón solito que dice "Municipio:"
+  document.querySelectorAll('div, span, p').forEach(function(el){
+    if(el.querySelector('input')) return;
+    if(el.children.length > 0) return;
+    var t = (el.textContent || '').trim();
+    if(t === 'Municipio:' || t === 'Municipio:'){
+      el.textContent = 'Municipio: Xonacatlán';
+    }
+    if(t === 'Estado:' || t === 'Estado:'){
+      el.textContent = 'Estado: Estado de México';
+    }
+  });
+}, 800);
+</script>
   // 2. ARREGLAR PANTALLA PRINCIPAL - sin tocar el Editar
   document.querySelectorAll('div').forEach(function(div){
     if(div.querySelector('input')) return;
