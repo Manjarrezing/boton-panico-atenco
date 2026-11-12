@@ -255,7 +255,7 @@ document.addEventListener('click', function(e){
 });
 </script>
 <script>
-// DOBLE CLIC PARA EDITAR - v3: busca datos y llena el formulario
+// DOBLE CLIC v4 - sin alert, llena aunque los ids sean distintos
 document.addEventListener('dblclick', function(e){
   var fila = e.target.closest ? e.target.closest('tr') : null;
   if(!fila) return;
@@ -265,22 +265,28 @@ document.addEventListener('dblclick', function(e){
   var folio = celdas[0].innerText.trim();
   if(!folio || folio === 'Folio') return;
 
-  fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(list){
+  fetch('/api/alertas').then(function(r){ return r.json(); }).then(function(j){
+    var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []);
     var d = list.find(function(x){ return (x.folio + '') === folio; });
     if(!d){ alert('No encontré datos para: ' + folio); return; }
+    console.log('DATOS ENCONTRADOS PARA', folio, d);
     // Abrir el modal con el botón amarillo
     var btnEditar = Array.from(document.querySelectorAll('button')).find(function(b){ return b.innerText.includes('Editar'); });
     if(btnEditar) btnEditar.click();
-    // Esperar un poquito a que abra y llenarlo
+    // Llenar con 800ms, para que no lo borre el que abre el modal
     setTimeout(function(){
       Object.keys(d).forEach(function(k){
-        var input = document.getElementById('m_' + k);
-        if(input && d[k] !== null && d[k] !== undefined) input.value = d[k];
+        var valor = d[k];
+        if(valor === null || valor === undefined) return;
+        var input = document.getElementById('m_' + k) ||
+                    document.getElementById('edit_' + k) ||
+                    document.getElementById('e_' + k) ||
+                    document.getElementById(k);
+        if(input) input.value = valor;
       });
-      // Por si el folio tiene otro nombre
-      var f = document.getElementById('m_folio');
+      var f = document.getElementById('m_folio') || document.getElementById('edit_folio') || document.getElementById('folio');
       if(f && !f.value) f.value = folio;
-    }, 300);
+    }, 800);
   }).catch(function(err){ alert('Error buscando datos: ' + err); });
 });
 </script>
