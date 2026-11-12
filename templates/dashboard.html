@@ -566,34 +566,19 @@ setInterval(function(){
     e.dispatchEvent(new Event('change', {bubbles:true}));
   }
 }, 500);
-// Arreglar pantalla principal - Municipio y Estado
+
+// Arreglar pantalla principal - SIN tocar el Editar
 setInterval(function(){
-  // Buscar todos los textos de la página
-  var todos = document.querySelectorAll('div, span, p, td');
-  todos.forEach(function(el){
-    var t = el.textContent || '';
-    // Si dice Municipio: y está vacío
-    if(t.trim() === 'Municipio:'){
-      el.textContent = 'Municipio: Xonacatlán';
-    }
-    if(t.trim() === 'Municipio: '){
-      el.textContent = 'Municipio: Xonacatlán';
-    }
-    if(t.trim() === 'Estado:'){
-      el.textContent = 'Estado: México';
-    }
-    if(t.trim() === 'Estado: '){
-      el.textContent = 'Estado: México';
+  document.querySelectorAll('div').forEach(function(div){
+    if(div.querySelector('input')) return;
+    var h = div.innerHTML || '';
+    if(h.indexOf('Municipio:') !== -1 && h.indexOf('C.P.:') !== -1){
+      var nuevo = h;
+      nuevo = nuevo.replace(/Municipio:\s*<br>/g, 'Municipio: Xonacatlán<br>');
+      nuevo = nuevo.replace(/Estado:\s*<br>/g, 'Estado: Estado de México<br>');
+      if(nuevo !== h) div.innerHTML = nuevo;
     }
   });
-  // También arreglar el cuadro de Dirección completo
-  var dir = document.body.innerHTML;
-  if(dir.indexOf('Municipio:<br>') !== -1){
-    document.body.innerHTML = dir.replace('Municipio:<br>', 'Municipio: Xonacatlán<br>');
-  }
-  if(dir.indexOf('Estado:<br>') !== -1){
-    document.body.innerHTML = dir.replace('Estado:<br>', 'Estado: México<br>');
-  }
 }, 1000);
 
 
