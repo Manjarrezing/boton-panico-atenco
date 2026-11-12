@@ -255,7 +255,7 @@ function mostrar(d){
   document.getElementById('ads').innerText=d.adscripcion||'-'; document.getElementById('autoridad').innerText=d.autoridad||'-';
   document.getElementById('delito').innerText=d.tipo_delito||'-'; document.getElementById('imputado').innerText=d.imputado||'-';
   document.getElementById('parentesco').innerText=d.parentesco||'-'; document.getElementById('caract').innerText=d.caracteristicas||'-';
-  document.getElementById('dirTxt').innerHTML='Calle: '+(d.calle||'')+' Número: '+(d.numero||'')+'<br>Entre Calles: '+(d.entre_calles||'')+'<br>Referencia: '+(d.referencia||'')+'<br>Localidad: '+(d.localidad||'')+'<br>Municipio: '+(d.municipio||'XONACATLÁN')+'<br>Estado: '+(d.estado||'Estado de México')+'<br>C.P.: '+(d.cp||'');
+  document.getElementById('dirTxt').innerHTML='Calle: '+(d.calle||'')+' Número: '+(d.numero||'')+'<br>Entre Calles: '+(d.entre_calles||'')+'<br>Referencia: '+(d.referencia||'')+'<br>Localidad: '+(d.localidad||'')+'<br>Municipio: '+(d.municipio||'Xonacatlán')+'<br>Estado: '+(d.estado||'Estado de México')+'<br>C.P.: '+(d.cp||'');
   document.getElementById('coords').innerText=d.lat+', '+d.lng+' Prec '+(d.precision||0)+'m';
   document.getElementById('gmaps').href='https://www.google.com/maps?q='+d.lat+','+d.lng;
   if(marker) map.removeLayer(marker);
