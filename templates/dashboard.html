@@ -90,7 +90,7 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
     <div><b style="color:#111;">Discapacidad</b><br><input id="m_discapacidad" style="width:100%; padding:8px;"></div>
     <div><b style="color:#111;">Inicio medida</b><br><input id="m_inicio" type="date" style="width:100%; padding:8px;"></div>
     <div><b style="color:#111;">Duración</b><br><input id="m_duracion" style="width:100%; padding:8px;"></div>
-    <div><b style="color:#111;">Fecha entrega pulsera</b><br><input id="m_entrega" type="date" style="width:100%; padding:8px;"></div>
+    <div><b style="color:#111;">Fecha de Instalación de aplicativo</b><br><input id="m_entrega" type="date" style="width:100%; padding:8px;"></div>
     <div><b style="color:#111;">Fecha fin</b><br><input id="m_fin" type="date" style="width:100%; padding:8px;"></div>
     <div><b style="color:#111;">Notas</b><br><textarea id="m_notas" style="width:100%; padding:8px;"></textarea></div>
     <div><b style="color:#111;">Foto de la persona</b><br><img id="m_foto_actual" style="width:100px; height:100px; object-fit:cover; border-radius:50%; display:none;"><input id="m_foto" type="file" accept="image/*" style="width:100%;"></div>
@@ -561,10 +561,41 @@ setInterval(function(){
   }
   var e = document.getElementById('estado');
   if(e && e.offsetParent && !e.value){
-    e.value = 'México';
+    e.value = 'Estado de México';
     e.dispatchEvent(new Event('input', {bubbles:true}));
     e.dispatchEvent(new Event('change', {bubbles:true}));
   }
 }, 500);
-</script>
+// Arreglar pantalla principal - Municipio y Estado
+setInterval(function(){
+  // Buscar todos los textos de la página
+  var todos = document.querySelectorAll('div, span, p, td');
+  todos.forEach(function(el){
+    var t = el.textContent || '';
+    // Si dice Municipio: y está vacío
+    if(t.trim() === 'Municipio:'){
+      el.textContent = 'Municipio: Xonacatlán';
+    }
+    if(t.trim() === 'Municipio: '){
+      el.textContent = 'Municipio: Xonacatlán';
+    }
+    if(t.trim() === 'Estado:'){
+      el.textContent = 'Estado: México';
+    }
+    if(t.trim() === 'Estado: '){
+      el.textContent = 'Estado: México';
+    }
+  });
+  // También arreglar el cuadro de Dirección completo
+  var dir = document.body.innerHTML;
+  if(dir.indexOf('Municipio:<br>') !== -1){
+    document.body.innerHTML = dir.replace('Municipio:<br>', 'Municipio: Xonacatlán<br>');
+  }
+  if(dir.indexOf('Estado:<br>') !== -1){
+    document.body.innerHTML = dir.replace('Estado:<br>', 'Estado: México<br>');
+  }
+}, 1000);
+
+
+  
 </body></html>
