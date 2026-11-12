@@ -205,12 +205,25 @@ function mostrar(d){
   document.getElementById('ultNombre').innerText=(d.nombres||'')+' '+(d.apellidos||'');
   document.getElementById('ultFecha').innerText=d.fecha||'';
   document.getElementById('rNombre').innerText=(d.nombres||'')+' '+(d.apellidos||'');
-  fetch('/api/buscar?folio='+encodeURIComponent(d.folio)).then(function(r){return r.json();}).then(function(j){
-  var u = Array.isArray(j)? j[0] : (j.resultado || j.datos || j.usuario || j);
-  var f = u && (u.foto || u.foto_persona || u.imagen || u.foto_url || u.photo || u.imagen_base64);
-  if(f){ document.getElementById('fotoMorado').src = f; }
-  else { document.getElementById('fotoMorado').src = 'https://i.pravatar.cc/300?img=47'; }
-}).catch(function(){});
+ (function(){
+  var candidatos = [d.folio_cad, d.folioCAD, d.folio_usuaria, d.folio_registro, d.folio_buscar, d.folio, d.folio_alerta, d.folioCad];
+  candidatos = candidatos.filter(function(x){ return x && x !== 'None' && x !== 'null'; });
+  var i = 0;
+  function intentar(){
+    if(i >= candidatos.length){ return; }
+    var f = candidatos[i++];
+    fetch('/api/buscar?folio='+encodeURIComponent(f)).then(function(r){return r.json();}).then(function(j){
+      var u = j.usuaria || j.usuario || j.resultado || j.datos || j;
+      var foto = u && (u.foto || u.foto_persona || u.imagen);
+      if(foto && foto.length > 100){
+        document.getElementById('fotoMorado').src = foto;
+      } else {
+        intentar();
+      }
+    }).catch(function(){ intentar(); });
+  }
+  intentar();
+})();
   document.getElementById('rMac').innerText=d.mac||'-'; document.getElementById('rEdad').innerText=d.edad||'-';
   document.getElementById('rCel').innerText=d.celular||'-'; document.getElementById('rOtro').innerText=d.otro||'-';
   document.getElementById('rHijos').innerText=d.hijos??'-'; document.getElementById('rNotas').innerText=d.notas||'-';
