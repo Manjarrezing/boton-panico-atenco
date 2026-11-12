@@ -523,6 +523,7 @@ document.addEventListener('click', function(e){
 setInterval(function(){
   function f(d){ var m=''+(d.getMonth()+1); if(m.length==1)m='0'+m; var a=''+d.getDate(); if(a.length==1)a='0'+a; return a+'/'+m+'/'+d.getFullYear(); }
   function fISO(d){ var m=''+(d.getMonth()+1); if(m.length==1)m='0'+m; var a=''+d.getDate(); if(a.length==1)a='0'+a; return d.getFullYear()+'-'+m+'-'+a; }
+  function aDMY(t){ return t.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$3/$2/$1'); }
   function poner(inp,val){ try{ var p=window.HTMLInputElement.prototype; var desc=Object.getOwnPropertyDescriptor(p,'value'); if(desc&&desc.set)desc.set.call(inp,val); else inp.value=val; }catch(e){ inp.value=val; } inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); }
   var hoy=new Date(); var fin=new Date(); fin.setMonth(fin.getMonth()+3);
   var fechas=[]; document.querySelectorAll('input[type="date"]').forEach(function(i){ if(i.offsetParent) fechas.push(i); });
@@ -530,9 +531,18 @@ setInterval(function(){
   document.querySelectorAll('div, p, span, li').forEach(function(el){
     if(el.querySelector('div, p, span')) return;
     var t=el.textContent||'';
-    if(t.indexOf('Inicio medida:')>-1 && t.trim().endsWith('-')) el.textContent='Inicio medida: '+f(hoy);
-    if(t.indexOf('Fecha entrega pulsera:')>-1 && t.trim().endsWith('-')) el.textContent='Fecha entrega pulsera: '+f(hoy);
-    if(t.indexOf('Fecha fin:')>-1 && t.trim().endsWith('-')) el.textContent='Fecha fin: '+f(fin);
+    if(t.indexOf('Inicio medida:')>-1){
+      if(t.trim().endsWith('-')) el.textContent='Inicio medida: '+f(hoy);
+      else if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
+    }
+    if(t.indexOf('Fecha entrega pulsera:')>-1){
+      if(t.trim().endsWith('-')) el.textContent='Fecha entrega pulsera: '+f(hoy);
+      else if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
+    }
+    if(t.indexOf('Fecha fin:')>-1){
+      if(t.trim().endsWith('-')) el.textContent='Fecha fin: '+f(fin);
+      else if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
+    }
   });
 },800);
 </script>
