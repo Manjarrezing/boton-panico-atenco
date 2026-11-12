@@ -521,7 +521,7 @@ document.addEventListener('click', function(e){
 <script>
 var _vigDesde = 0;
 setInterval(function(){
-  // --- 1. FECHAS - con los nombres REALES de tu app ---
+  // --- 1. FECHAS - si está en "-" pone HOY ---
   var texto = document.body.innerText || '';
   function sacar(palabra){
     var desde = 0;
@@ -529,18 +529,38 @@ setInterval(function(){
       var i = texto.indexOf(palabra, desde);
       if(i === -1) return '';
       var pedazo = texto.substring(i, i+250);
-      // Busca 2026-11-12
       var m1 = pedazo.match(/\d{4}-\d{2}-\d{2}/);
       if(m1) return m1[0];
-      // Busca 12/11/2026 y lo convierte a 2026-11-12
       var m2 = pedazo.match(/(\d{2})\/(\d{2})\/(\d{4})/);
       if(m2) return m2[3] + '-' + m2[2] + '-' + m2[1];
       desde = i + palabra.length;
     }
   }
+  function hoyISO(){
+    var d = new Date();
+    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
+    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
+    return d.getFullYear() + '-' + m + '-' + dia;
+  }
+  function sumarMeses(fechaISO, meses){
+    var p = fechaISO.split('-');
+    var d = new Date(parseInt(p[0]), parseInt(p[1])-1+meses, parseInt(p[2]));
+    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
+    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
+    return d.getFullYear() + '-' + m + '-' + dia;
+  }
+  // Duración: "3 meses"
+  var meses = 3;
+  var md = texto.match(/Duración:\s*(\d+)/);
+  if(md) meses = parseInt(md[1]);
   var vInicio = sacar('Inicio medida');
-  var vEntrega = sacar('Fecha de Instalación');
+  var vEntrega = sacar('Fecha entrega pulsera');
+  if(!vEntrega) vEntrega = sacar('Fecha de Instalación');
   var vFin = sacar('Fecha fin');
+  // Si no hay fecha, usa HOY
+  if(!vInicio) vInicio = hoyISO();
+  if(!vEntrega) vEntrega = hoyISO();
+  if(!vFin) vFin = sumarMeses(vInicio, meses);
   var todos = [];
   document.querySelectorAll('input[type="date"]').forEach(function(inp){
     if(inp.offsetParent) todos.push(inp);
@@ -550,15 +570,15 @@ setInterval(function(){
     if(Date.now() - _vigDesde <= 4000){
       var lista = todos.length >= 4 ? todos.slice(-3) : todos;
       if(lista.length === 3){
-        if(vInicio && !lista[0].value) lista[0].value = vInicio;
-        if(vEntrega && !lista[1].value) lista[1].value = vEntrega;
-        if(vFin && !lista[2].value) lista[2].value = vFin;
+        if(!lista[0].value) lista[0].value = vInicio;
+        if(!lista[1].value) lista[1].value = vEntrega;
+        if(!lista[2].value) lista[2].value = vFin;
       }
     }
   } else {
     _vigDesde = 0;
   }
-  // --- 2. EDITAR MUNICIPIO / ESTADO ---
+  // --- 2. EDITAR MUNICIPIO / ESTADO (igual que antes, ya jala) ---
   document.querySelectorAll('input').forEach(function(inp){
     if(!inp.offsetParent) return;
     if(inp.value) return;
@@ -584,7 +604,7 @@ setInterval(function(){
       }
     }
   });
-  // --- 3. PRINCIPAL - busca el bloque que tiene Direccion + C.P. juntos ---
+  // --- 3. PRINCIPAL MUNICIPIO / ESTADO (igual que antes, ya jala) ---
   document.querySelectorAll('div').forEach(function(div){
     if(div.querySelector('input')) return;
     var h = div.innerHTML || '';
@@ -596,11 +616,8 @@ setInterval(function(){
     nuevo = nuevo.replace(/Estado:\s*(<br[^>]*>|\s)*C\.P\.:/g, 'Estado: Estado de México<br>C.P.:');
     nuevo = nuevo.replace(/Municipio:\s*<br[^>]*>/g, 'Municipio: Xonacatlán<br>');
     nuevo = nuevo.replace(/Estado:\s*<br[^>]*>/g, 'Estado: Estado de México<br>');
-    // Si sigue vacío, por si está en divs separados
-    nuevo = nuevo.replace(/Municipio:\s*<\/div>\s*<div[^>]*>\s*<\/div>/g, 'Municipio: Xonacatlán</div><div>Estado:');
     if(nuevo !== h) div.innerHTML = nuevo;
   });
 }, 800);
 </script>
-  
 </body></html>
