@@ -37,13 +37,13 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 }
 </style></head>
 <body>
-<div id="top"><div>🛡️ <b>XONACATLÁN</b> | Central de Alertamientos</div><div>🔔 <span id="contador">0</span> | <button onclick="location.reload()">↻</button></div></div>
+<div id="top"><div>🛡️ <b>XONACTLÁN</b> | Central de Alertamientos</div><div>🔔 <span id="contador">0</span> | <button onclick="location.reload()">↻</button></div></div>
 <div id="layout">
-<div id="sidebar"><b>TANIA<br>ANDREA</b><p style="font-size:11px">A GENERAL</p><div class="active">👤 Usuario</div><div onclick="location.href='/buscar'">🔍 Buscar</div><div onclick="location.href='/export_excel'">📊 Export Excel</div><div>🛎️ Servicios</div><div onclick="salir()">🚪 Salir</div><div onclick="location.href='/registro'">➕ Nuevo Registro</div></div>
+<div id="sidebar"><b>TANIA<br>ANDREA</b><p style="font-size:11px">A GENERAL</p><div class="active">👤 Usuario</div><div onclick="location.href='/buscar'">🔍 Buscar</div><div>📋 Encuesta</div><div>🛎️ Servicios</div><div onclick="salir()">🚪 Salir</div><div onclick="location.href='/registro'">➕ Nuevo Registro</div></div>
 <div id="main">
 <div id="left">
 <div class="card" id="caja-ultimos"><b>Últimos alertamientos</b><table><thead><tr><th>Folio</th><th>Folio CAD</th><th>Nombres</th><th>Apellidos</th><th> y hora</th></tr></thead><tbody id="tabla"></tbody></table></div>
-<div class="card"></div style="font-size:12px"><b>📍 Última ubicación en vivo</b> - <span id="coords">Esperando alerta...</span> | <a href="#" id="gmaps" target="_blank">Abrir Google Maps</a></p></div></div>
+<div class="card"><div id="map"></div><p style="font-size:12px"><b>📍 Última ubicación en vivo</b> - <span id="coords">Esperando alerta...</span> | <a href="#" id="gmaps" target="_blank">Abrir Google Maps</a></p></div>
 <div class="card"><b>Dirección:</b><div id="dirTxt">Selecciona un alertamiento de la tabla</div></div>
 <div class="card" style="background:#0b2a4a;color:white"><b>Adscripción: <span id="ads">-</span></b><br>Autoridad: <span id="autoridad">-</span><br>Tipo de delito: <span id="delito">-</span><br>Imputado: <span id="imputado">-</span> | Parentesco: <span id="parentesco">-</span><br>Características: <span id="caract">-</span></div>
 </div>
@@ -75,8 +75,8 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
     <div><b style="color:#111;">Referencia</b><br><input id="m_referencia" style="width:100%; padding:8px;"></div>
     <div><b style="color:#111;">Localidad</b><br><input id="m_localidad" style="width:100%; padding:8px;"></div>
     
-    <div style="color:#111">Municipio<br><input id="municipio" value="Xonacatlán" style="width:100%; padding:8px"></div>
-    <div style="color:#111">Estado<br><input id="estado" value="Estado de México" style="width:100%; padding:8px"></div>
+    <div style="color:#111">Municipio:<br><input id="municipio" style="width:100%; padding:8px"></div>
+    <div style="color:#111">Estado:<br><input id="estado" style="width:100%; padding:8px"></div>
     
     <div><b style="color:#111;">C.P.</b><br><input id="m_cp" style="width:100%; padding:8px;"></div>
     <div><b style="color:#111;">Número de carpeta</b><br><input id="m_carpeta" style="width:100%; padding:8px;"></div>
@@ -219,7 +219,6 @@ function salir(){
 const socket=io({transports:['websocket','polling']});
 let map=L.map('map').setView([19.2749,-99.5389],14);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-setTimeout(()=>{ map.invalidateSize(); }, 800);
 let marker=null, actual=null, count=0;
 if(Notification.permission!=='granted') Notification.requestPermission();
 function mostrar(d){
@@ -256,16 +255,12 @@ function mostrar(d){
   document.getElementById('ads').innerText=d.adscripcion||'-'; document.getElementById('autoridad').innerText=d.autoridad||'-';
   document.getElementById('delito').innerText=d.tipo_delito||'-'; document.getElementById('imputado').innerText=d.imputado||'-';
   document.getElementById('parentesco').innerText=d.parentesco||'-'; document.getElementById('caract').innerText=d.caracteristicas||'-';
-  document.getElementById('dirTxt').innerHTML='Calle: '+(d.calle||'')+' Número: '+(d.numero||'')+'<br>Entre Calles: '+(d.entre_calles||'')+'<br>Referencia: '+(d.referencia||'')+'<br>Localidad: '+(d.localidad||'')+'<br>Municipio: '+(d.municipio||'Xonacatlán')+'<br>Estado: '+(d.estado||'Estado de México')+'<br>C.P.: '+(d.cp||'');
- let lat = parseFloat(d.lat ?? d.latitud ?? d.latitude ?? d.lat_panico ?? 0);
-let lng = parseFloat(d.lng ?? d.lon ?? d.longitud ?? d.longitude ?? d.lng_panico ?? 0);
-document.getElementById('coords').innerText=lat+', '+lng+' Prec '+(d.precision||0)+' m';
-document.getElementById('gmaps').href='https://www.google.com/maps?q='+lat+','+lng;
-if(!isNaN(lat) && !isNaN(lng) && lat!=0){
+  document.getElementById('dirTxt').innerHTML='Calle: '+(d.calle||'')+' Número: '+(d.numero||'')+'<br>Entre Calles: '+(d.entre_calles||'')+'<br>Referencia: '+(d.referencia||'')+'<br>Localidad: '+(d.localidad||'')+'<br>Municipio: '+(d.municipio||'')+'<br>Estado: '+(d.estado||'')+'<br>C.P.: '+(d.cp||'');
+  document.getElementById('coords').innerText=d.lat+', '+d.lng+' Prec '+(d.precision||0)+'m';
+  document.getElementById('gmaps').href='https://www.google.com/maps?q='+d.lat+','+d.lng;
   if(marker) map.removeLayer(marker);
-  marker=L.marker([lat,lng]).addTo(map).bindPopup('<b>'+d.nombres+'</b><br>'+d.celular).openPopup();
-  map.setView([lat,lng],17);
-}
+  marker=L.marker([d.lat,d.lng]).addTo(map).bindPopup('<b>'+d.nombres+'</b><br>'+d.celular).openPopup();
+  map.setView([d.lat,d.lng],17);
 }
 socket.on('nueva_alerta', d=>{
   document.querySelectorAll('#tabla tr').forEach(tr=>{ if(tr.textContent.includes(d.folio)) tr.remove(); });
@@ -279,7 +274,7 @@ socket.on('nueva_alerta', d=>{
   mostrar(d);
   activarParpadeo();
 });
-socket.on('ubicacion_update', d=>{ if(!actual || d.folio!==actual.folio) return; let la=parseFloat(d.lat ?? d.latitud ?? d.lat_panico ?? 0); let lo=parseFloat(d.lng ?? d.longitud ?? d.lng_panico ?? 0); if(!la || !lo) return; if(marker) marker.setLatLng([la,lo]); else marker=L.marker([la,lo]).addTo(map); map.setView([la,lo],17); document.getElementById('coords').innerText=la+', '+lo; });
+socket.on('ubicacion_update', d=>{ if(marker && actual && d.folio===actual.folio){ marker.setLatLng([d.lat,d.lng]); document.getElementById('coords').innerText=d.lat+', '+d.lng+' - EN VIVO'; } });
 function atender(){ if(actual){ socket.emit('atender',{id:actual.id}); document.getElementById('rAtendido').innerText='Atendido'; document.getElementById('alarma').pause(); alert('Marcado como atendido'); } }
 function llamar(){ if(actual) window.location.href='tel:'+actual.celular; }
 fetch('/api/alertas').then(r=>r.json()).then(list=>{ let unicos={}; list.forEach(a=>{ unicos[a.folio]=a; }); list=Object.values(unicos); list.reverse().forEach(d=>{ let tr=document.createElement('tr'); tr.innerHTML='<td>'+d.folio+'</td><td>'+(d.folio_cad||'None')+'</td><td>'+d.nombres+'</td><td>'+d.apellidos+'</td><td>'+d.fecha+'</td>'; tr.onclick=()=>mostrar(d); document.getElementById('tabla').appendChild(tr); }); if(list.length) mostrar(list[list.length-1]); });
@@ -313,7 +308,6 @@ document.addEventListener('click', function(e){
   if(folio && folio !== 'Folio'){
     folioSeleccionado = folio;
     console.log('SELECCIONADO:', folioSeleccionado);
-    fetch('/api/alertas').then(function(r){return r.json();}).then(function(j){ var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []); var d = list.find(function(x){ return (x.folio||'').trim() === folioSeleccionado; }); if(!d) return; var la = d.lat || d.latitud; var lo = d.lng || d.longitud || d.lon; if(la && lo){ map.setView([parseFloat(la), parseFloat(lo)],17); } }).catch(function(){});
   }
 }, true);
 
@@ -335,9 +329,7 @@ document.addEventListener('click', function(e){
     var d = list.find(function(x){ return (x.folio + '').trim() === folioSeleccionado; });
     if(!d){ alert('No encontré datos para: ' + folioSeleccionado); return; }
     window.actual = d;
-    try{ actual = d; }catch(err){
-    if(actual && actual.lat && actual.lng){ map.setView([parseFloat(actual.lat), parseFloat(actual.lng)],17); }
-    }
+    try{ actual = d; }catch(err){}
 
     var modal = document.getElementById('modalEditar') ||
       Array.from(document.querySelectorAll('div')).find(function(div){
@@ -525,40 +517,41 @@ document.addEventListener('click', function(e){
   });
 }, true);
 
-</script>
-
 <script>
+var _vigDesde = 0;
 setInterval(function(){
-  function fISO(d){ var m=''+(d.getMonth()+1); if(m.length==1)m='0'+m; var a=''+d.getDate(); if(a.length==1)a='0'+a; return d.getFullYear()+'-'+m+'-'+a; }
-  function aDMY(t){ return t.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$3/$2/$1'); }
-  function poner(inp,val){ try{ var p=window.HTMLInputElement.prototype; var desc=Object.getOwnPropertyDescriptor(p,'value'); if(desc&&desc.set)desc.set.call(inp,val); else inp.value=val; }catch(e){ inp.value=val; } inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); }
-  var hoy=new Date(); var fin=new Date(); fin.setMonth(fin.getMonth()+3);
-  var fechas=[]; document.querySelectorAll('input[type="date"]').forEach(function(i){ if(i.offsetParent) fechas.push(i); });
-  if(fechas.length>=3){ var l=fechas.length>=4?fechas.slice(-3):fechas; if(!l[0].value) poner(l[0],fISO(hoy)); if(!l[1].value) poner(l[1],fISO(hoy)); if(!l[2].value) poner(l[2],fISO(fin)); }
-  var panel=null;
-  document.querySelectorAll('div').forEach(function(d){
-    var t=d.textContent||'';
-    if(t.indexOf('Inicio medida:')>-1 && t.indexOf('Fecha fin:')>-1){
-      if(!panel || d.innerHTML.length < panel.innerHTML.length) panel=d;
+  var texto = document.body.innerText || '';
+  function sacar(palabra){
+    var desde = 0;
+    while(true){
+      var i = texto.indexOf(palabra, desde);
+      if(i === -1) return '';
+      var pedazo = texto.substring(i, i+200);
+      var m = pedazo.match(/\d{4}-\d{2}-\d{2}/);
+      if(m) return m[0];
+      desde = i + palabra.length;
     }
+  }
+  var vInicio = sacar('Inicio medida');
+  var vEntrega = sacar('Fecha entrega pulsera');
+  var vFin = sacar('Fecha fin');
+  var todos = [];
+  document.querySelectorAll('input[type="date"]').forEach(function(inp){
+    if(inp.offsetParent) todos.push(inp);
   });
-  if(panel){
-    panel.querySelectorAll('div, p, span, li, b, strong').forEach(function(el){
-      if(el.querySelector('div, p, span, li, b, strong')) return;
-      var t=el.textContent||'';
-      if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
-    });
+  // Si no hay modal de fechas abierto, reiniciar
+  if(todos.length < 3){ _vigDesde = 0; return; }
+  if(!_vigDesde) _vigDesde = Date.now();
+  // Solo los primeros 4 segundos, después te deja modificar libre
+  if(Date.now() - _vigDesde > 4000) return;
+  // 1. FECHAS
+  var lista = todos.length >= 4 ? todos.slice(-3) : todos;
+  if(lista.length === 3){
+    if(vInicio && !lista[0].value) lista[0].value = vInicio;
+    if(vEntrega && !lista[1].value) lista[1].value = vEntrega;
+    if(vFin && !lista[2].value) lista[2].value = vFin;
   }
-},800);
-
-fetch('/api/quien_soy').then(function(r){ return r.json(); }).then(function(d){
-  var nombre = d.usuario || '';
-  if(!nombre) return;
-  if(document.body.innerHTML.indexOf('TANIA')>-1){
-    document.body.innerHTML = document.body.innerHTML
-      .replace(/TANIA\s*<br[^>]*>\s*ANDREA/gi, nombre.toUpperCase())
-      .replace(/TANIA\s+ANDREA/gi, nombre.toUpperCase());
-  }
-});
+}, 800);
 </script>
+
 </body></html>
