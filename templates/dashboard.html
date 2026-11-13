@@ -263,7 +263,7 @@ document.getElementById('coords').innerText=lat+', '+lng+' Prec '+(d.precision||
 document.getElementById('gmaps').href='https://www.google.com/maps?q='+lat+','+lng;
 if(!isNaN(lat) && !isNaN(lng) && lat!=0){
   if(marker) map.removeLayer(marker);
-  marker=L.marker([lat,lng]).addTo(map).bindPopup('<b>'+d.nombres+'</b><br>'+d.celular).openPopup();
+  marker=L.circleMarker([lat,lng],{radius:14,color:'red',fillColor:'red',fillOpacity:1,weight:3}).addTo(map).bindPopup('<b>'+d.nombres+'</b><br>'+d.celular).openPopup();
   map.setView([lat,lng],17);
 }
 }
