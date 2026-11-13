@@ -517,71 +517,13 @@ document.addEventListener('click', function(e){
   });
 }, true);
 
+</script>
 
   <script>
 setInterval(function(){
-  function hoy(){
-    var d = new Date();
-    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
-    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
-    return d.getFullYear() + '-' + m + '-' + dia;
-  }
-  function hoyTexto(){
-    var d = new Date();
-    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
-    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
-    return dia + '/' + m + '/' + d.getFullYear();
-  }
-  function sumarMesesTexto(meses){
-    var d = new Date();
-    d.setMonth(d.getMonth()+meses);
-    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
-    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
-    return dia + '/' + m + '/' + d.getFullYear();
-  }
-  function sumarMesesISO(meses){
-    var d = new Date();
-    d.setMonth(d.getMonth()+meses);
-    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
-    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
-    return d.getFullYear() + '-' + m + '-' + dia;
-  }
-  function poner(inp, val){
-    var proto = window.HTMLInputElement.prototype;
-    var desc = Object.getOwnPropertyDescriptor(proto, 'value');
-    if(desc && desc.set) desc.set.call(inp, val);
-    else inp.value = val;
-    inp.dispatchEvent(new Event('input', {bubbles:true}));
-    inp.dispatchEvent(new Event('change', {bubbles:true}));
-  }
-  // --- 1. LLENA EL EDITAR CON HOY ---
-  var fechas = [];
-  document.querySelectorAll('input[type="date"]').forEach(function(i){
-    if(i.offsetParent) fechas.push(i);
-  });
-  if(fechas.length >= 3){
-    var lista = fechas.length >= 4 ? fechas.slice(-3) : fechas;
-    if(!lista[0].value) poner(lista[0], hoy());
-    if(!lista[1].value) poner(lista[1], hoy());
-    if(!lista[2].value) poner(lista[2], sumarMesesISO(3));
-  }
-  // --- 2. LLENA LA PRINCIPAL MORADA ---
-  // Busca el panel que tiene "Inicio medida: -"
-  document.querySelectorAll('div').forEach(function(div){
-    if(div.querySelector('input')) return;
-    var h = div.innerHTML || '';
-    if(h.indexOf('Inicio medida') === -1) return;
-    if(h.indexOf('Fecha fin') === -1) return;
-    if(h.length > 4000) return;
-    var n = h;
-    n = n.replace(/Inicio medida:\s*-/g, 'Inicio medida: ' + hoyTexto());
-    n = n.replace(/Fecha entrega pulsera:\s*-/g, 'Fecha entrega pulsera: ' + hoyTexto());
-    n = n.replace(/Fecha fin:\s*-/g, 'Fecha fin: ' + sumarMesesTexto(3));
-    // Por si está en formato "Inicio medida: -<br>" con salto
-    n = n.replace(/Inicio medida:\s*<br[^>]*>\s*-/g, 'Inicio medida:<br>' + hoyTexto());
-    if(n !== h) div.innerHTML = n;
-  });
-}, 800);
+  document.title = "SI JALA";
+  document.body.style.border = "10px solid red";
+}, 1000);
 </script>
-
+  
 </body></html>
