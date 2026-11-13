@@ -37,7 +37,7 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 }
 </style></head>
 <body>
-<div id="top"><div>🛡️ <b>XONACTLÁN</b> | Central de Alertamientos</div><div>🔔 <span id="contador">0</span> | <button onclick="location.reload()">↻</button></div></div>
+<div id="top"><div>🛡️ <b>XONACATLÁN</b> | Central de Alertamientos</div><div>🔔 <span id="contador">0</span> | <button onclick="location.reload()">↻</button></div></div>
 <div id="layout">
 <div id="sidebar"><b>TANIA<br>ANDREA</b><p style="font-size:11px">A GENERAL</p><div class="active">👤 Usuario</div><div onclick="location.href='/buscar'">🔍 Buscar</div><div>📋 Encuesta</div><div>🛎️ Servicios</div><div onclick="salir()">🚪 Salir</div><div onclick="location.href='/registro'">➕ Nuevo Registro</div></div>
 <div id="main">
@@ -75,8 +75,8 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
     <div><b style="color:#111;">Referencia</b><br><input id="m_referencia" style="width:100%; padding:8px;"></div>
     <div><b style="color:#111;">Localidad</b><br><input id="m_localidad" style="width:100%; padding:8px;"></div>
     
-    <div style="color:#111">Municipio:<br><input id="municipio" style="width:100%; padding:8px"></div>
-    <div style="color:#111">Estado:<br><input id="estado" style="width:100%; padding:8px"></div>
+    <div style="color:#111">Municipio:XONACATLÁN<br><input id="municipio" style="width:100%; padding:8px"></div>
+    <div style="color:#111">Estado:ESTADO DE MÉXICO<br><input id="estado" style="width:100%; padding:8px"></div>
     
     <div><b style="color:#111;">C.P.</b><br><input id="m_cp" style="width:100%; padding:8px;"></div>
     <div><b style="color:#111;">Número de carpeta</b><br><input id="m_carpeta" style="width:100%; padding:8px;"></div>
@@ -519,11 +519,67 @@ document.addEventListener('click', function(e){
 
 </script>
 
-  <script>
+<script>
 setInterval(function(){
-  document.title = "SI JALA";
-  document.body.style.border = "10px solid red";
-}, 1000);
+  // --- 1. FECHAS dia/mes/año, lo que ya tenias ---
+  function fISO(d){ var m=''+(d.getMonth()+1); if(m.length==1)m='0'+m; var a=''+d.getDate(); if(a.length==1)a='0'+a; return d.getFullYear()+'-'+m+'-'+a; }
+  function aDMY(t){ return t.replace(/(\d{4})-(\d{2})-(\d{2})/g, '$3/$2/$1'); }
+  function poner(inp,val){ try{ var p=window.HTMLInputElement.prototype; var desc=Object.getOwnPropertyDescriptor(p,'value'); if(desc&&desc.set)desc.set.call(inp,val); else inp.value=val; }catch(e){ inp.value=val; } inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); }
+  var hoy=new Date(); var fin=new Date(); fin.setMonth(fin.getMonth()+3);
+  var fechas=[]; document.querySelectorAll('input[type="date"]').forEach(function(i){ if(i.offsetParent) fechas.push(i); });
+  if(fechas.length>=3){ var l=fechas.length>=4?fechas.slice(-3):fechas; if(!l[0].value) poner(l[0],fISO(hoy)); if(!l[1].value) poner(l[1],fISO(hoy)); if(!l[2].value) poner(l[2],fISO(fin)); }
+  var panel=null;
+  document.querySelectorAll('div').forEach(function(d){
+    var t=d.textContent||'';
+    if(t.indexOf('Inicio medida:')>-1 && t.indexOf('Fecha fin:')>-1){
+      if(!panel || d.innerHTML.length < panel.innerHTML.length) panel=d;
+    }
+  });
+  if(panel){
+    panel.querySelectorAll('div, p, span, li, b, strong').forEach(function(el){
+      if(el.querySelector('div, p, span, li, b, strong')) return;
+      var t=el.textContent||'';
+      if(/(\d{4})-(\d{2})-(\d{2})/.test(t)) el.textContent=aDMY(t);
+    });
+  }
+
+  // --- 2. NOMBRE DEL USUARIO QUE INICIO SESION ---
+  var nombreGuardado = localStorage.getItem('nombre_usuario_logueado');
+  if(nombreGuardado){
+    document.querySelectorAll('div, p, span, h2, h3').forEach(function(el){
+      var t = el.textContent||'';
+      if(t.indexOf('TANIA')>-1 && t.indexOf('ANDREA')>-1){
+        // Solo cambiamos el contenedor mas chiquito que tiene el nombre
+        if(el.querySelectorAll('div, p, span').length === 0){
+          el.textContent = nombreGuardado.toUpperCase();
+        }
+      }
+    });
+    // Si el nombre esta en 2 renglones TANIA / ANDREA, lo buscamos por el contenedor azul
+    document.querySelectorAll('div').forEach(function(d){
+      if((d.textContent||'').indexOf('TANIA')>-1 && (d.textContent||'').indexOf('A GENERAL')>-1 && d.innerHTML.length < 500){
+        // No borramos el A GENERAL, solo el nombre
+        d.innerHTML = d.innerHTML.replace(/TANIA[\s\S]*?ANDREA/gi, nombreGuardado.toUpperCase());
+      }
+    });
+  }
+},800);
+
+// --- 3. GUARDAR EL NOMBRE CUANDO INICIAN SESION ---
+document.addEventListener('submit', function(e){
+  var form = e.target;
+  var inputs = form.querySelectorAll('input');
+  for(var i=0;i<inputs.length;i++){
+    var tipo = (inputs[i].type||'').toLowerCase();
+    var nombre = (inputs[i].name||'').toLowerCase();
+    var id = (inputs[i].id||'').toLowerCase();
+    if(tipo==='text' || nombre.indexOf('usu')>-1 || nombre.indexOf('user')>-1 || nombre.indexOf('nombre')>-1 || id.indexOf('usu')>-1 || id.indexOf('user')>-1){
+      if(inputs[i].value && inputs[i].value.length > 1){
+        localStorage.setItem('nombre_usuario_logueado', inputs[i].value.trim());
+        break;
+      }
+    }
+  }
+}, true);
 </script>
-  
 </body></html>
