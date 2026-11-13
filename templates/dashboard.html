@@ -313,6 +313,7 @@ document.addEventListener('click', function(e){
   if(folio && folio !== 'Folio'){
     folioSeleccionado = folio;
     console.log('SELECCIONADO:', folioSeleccionado);
+    fetch('/api/alertas').then(function(r){return r.json();}).then(function(j){ var list = Array.isArray(j) ? j : (j.alertas || j.data || j.registros || []); var d = list.find(function(x){ return (x.folio||'').trim() === folioSeleccionado; }); if(!d) return; var la = d.lat || d.latitud; var lo = d.lng || d.longitud || d.lon; if(la && lo){ map.setView([parseFloat(la), parseFloat(lo)],17); } }).catch(function(){});
   }
 }, true);
 
