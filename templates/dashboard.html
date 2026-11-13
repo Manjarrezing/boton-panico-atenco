@@ -37,7 +37,7 @@ button{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
 }
 </style></head>
 <body>
-<div id="top"><div>🛡️ <b>XONACATLÁN</b> | Central de Alertamientos</div><div>🔔 <span id="contador">0</span> | <button onclick="location.reload()">↻</button></div></div>
+<div id="top"><div>🛡️ <b>XONACTLÁN</b> | Central de Alertamientos</div><div>🔔 <span id="contador">0</span> | <button onclick="location.reload()">↻</button></div></div>
 <div id="layout">
 <div id="sidebar"><b>TANIA<br>ANDREA</b><p style="font-size:11px">A GENERAL</p><div class="active">👤 Usuario</div><div onclick="location.href='/buscar'">🔍 Buscar</div><div>📋 Encuesta</div><div>🛎️ Servicios</div><div onclick="salir()">🚪 Salir</div><div onclick="location.href='/registro'">➕ Nuevo Registro</div></div>
 <div id="main">
@@ -517,40 +517,70 @@ document.addEventListener('click', function(e){
   });
 }, true);
 
-<script>
-var _vigDesde = 0;
+
+  <script>
 setInterval(function(){
-  var texto = document.body.innerText || '';
-  function sacar(palabra){
-    var desde = 0;
-    while(true){
-      var i = texto.indexOf(palabra, desde);
-      if(i === -1) return '';
-      var pedazo = texto.substring(i, i+200);
-      var m = pedazo.match(/\d{4}-\d{2}-\d{2}/);
-      if(m) return m[0];
-      desde = i + palabra.length;
-    }
+  function hoy(){
+    var d = new Date();
+    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
+    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
+    return d.getFullYear() + '-' + m + '-' + dia;
   }
-  var vInicio = sacar('Inicio medida');
-  var vEntrega = sacar('Fecha entrega pulsera');
-  var vFin = sacar('Fecha fin');
-  var todos = [];
-  document.querySelectorAll('input[type="date"]').forEach(function(inp){
-    if(inp.offsetParent) todos.push(inp);
+  function hoyTexto(){
+    var d = new Date();
+    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
+    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
+    return dia + '/' + m + '/' + d.getFullYear();
+  }
+  function sumarMesesTexto(meses){
+    var d = new Date();
+    d.setMonth(d.getMonth()+meses);
+    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
+    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
+    return dia + '/' + m + '/' + d.getFullYear();
+  }
+  function sumarMesesISO(meses){
+    var d = new Date();
+    d.setMonth(d.getMonth()+meses);
+    var m = '' + (d.getMonth()+1); if(m.length===1) m='0'+m;
+    var dia = '' + d.getDate(); if(dia.length===1) dia='0'+dia;
+    return d.getFullYear() + '-' + m + '-' + dia;
+  }
+  function poner(inp, val){
+    var proto = window.HTMLInputElement.prototype;
+    var desc = Object.getOwnPropertyDescriptor(proto, 'value');
+    if(desc && desc.set) desc.set.call(inp, val);
+    else inp.value = val;
+    inp.dispatchEvent(new Event('input', {bubbles:true}));
+    inp.dispatchEvent(new Event('change', {bubbles:true}));
+  }
+  // --- 1. LLENA EL EDITAR CON HOY ---
+  var fechas = [];
+  document.querySelectorAll('input[type="date"]').forEach(function(i){
+    if(i.offsetParent) fechas.push(i);
   });
-  // Si no hay modal de fechas abierto, reiniciar
-  if(todos.length < 3){ _vigDesde = 0; return; }
-  if(!_vigDesde) _vigDesde = Date.now();
-  // Solo los primeros 4 segundos, después te deja modificar libre
-  if(Date.now() - _vigDesde > 4000) return;
-  // 1. FECHAS
-  var lista = todos.length >= 4 ? todos.slice(-3) : todos;
-  if(lista.length === 3){
-    if(vInicio && !lista[0].value) lista[0].value = vInicio;
-    if(vEntrega && !lista[1].value) lista[1].value = vEntrega;
-    if(vFin && !lista[2].value) lista[2].value = vFin;
+  if(fechas.length >= 3){
+    var lista = fechas.length >= 4 ? fechas.slice(-3) : fechas;
+    if(!lista[0].value) poner(lista[0], hoy());
+    if(!lista[1].value) poner(lista[1], hoy());
+    if(!lista[2].value) poner(lista[2], sumarMesesISO(3));
   }
+  // --- 2. LLENA LA PRINCIPAL MORADA ---
+  // Busca el panel que tiene "Inicio medida: -"
+  document.querySelectorAll('div').forEach(function(div){
+    if(div.querySelector('input')) return;
+    var h = div.innerHTML || '';
+    if(h.indexOf('Inicio medida') === -1) return;
+    if(h.indexOf('Fecha fin') === -1) return;
+    if(h.length > 4000) return;
+    var n = h;
+    n = n.replace(/Inicio medida:\s*-/g, 'Inicio medida: ' + hoyTexto());
+    n = n.replace(/Fecha entrega pulsera:\s*-/g, 'Fecha entrega pulsera: ' + hoyTexto());
+    n = n.replace(/Fecha fin:\s*-/g, 'Fecha fin: ' + sumarMesesTexto(3));
+    // Por si está en formato "Inicio medida: -<br>" con salto
+    n = n.replace(/Inicio medida:\s*<br[^>]*>\s*-/g, 'Inicio medida:<br>' + hoyTexto());
+    if(n !== h) div.innerHTML = n;
+  });
 }, 800);
 </script>
 
