@@ -201,7 +201,7 @@ def api_actualizar():
         return jsonify({"ok": False, "mensaje": "Error: " + str(e)}), 500
 @app.route('/export_excel')
 def export_excel():
-    if 'user' not in session:
+    if not session:
         return redirect('/login')
     conn = db(); c = cur(conn)
     c.execute("SELECT * FROM usuarias ORDER BY id DESC")
