@@ -219,6 +219,7 @@ function salir(){
 const socket=io({transports:['websocket','polling']});
 let map=L.map('map').setView([19.2749,-99.5389],14);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+setTimeout(()=>{ map.invalidateSize(); }, 800);
 let marker=null, actual=null, count=0;
 if(Notification.permission!=='granted') Notification.requestPermission();
 function mostrar(d){
