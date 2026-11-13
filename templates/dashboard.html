@@ -334,7 +334,9 @@ document.addEventListener('click', function(e){
     var d = list.find(function(x){ return (x.folio + '').trim() === folioSeleccionado; });
     if(!d){ alert('No encontré datos para: ' + folioSeleccionado); return; }
     window.actual = d;
-    try{ actual = d; }catch(err){}
+    try{ actual = d; }catch(err){
+    if(actual && actual.lat && actual.lng){ map.setView([parseFloat(actual.lat), parseFloat(actual.lng)],17); }
+    }
 
     var modal = document.getElementById('modalEditar') ||
       Array.from(document.querySelectorAll('div')).find(function(div){
