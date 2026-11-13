@@ -4,7 +4,7 @@ from flask_socketio import SocketIO, emit
 import datetime, uuid, os
 import psycopg2
 import psycopg2.extras
-import io, base64
+import io, base64 os
 from flask import send_file
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image as XLImage
@@ -244,18 +244,40 @@ def export_excel():
             if isinstance(val, (datetime.datetime, datetime.date)):
                 val = val.strftime('%d/%m/%Y %H:%M')
             ws.cell(row=r_idx, column=c_idx, value=str(val) if val is not None else '')
-        if foto_col:
+               if foto_col:
             foto_data = row.get(foto_col, '')
-            if foto_data and isinstance(foto_data, str) and len(foto_data) > 100:
-                try:
+            img_bytes = None
+            try:
+                # Caso 1: ya viene en bytes
+                if isinstance(foto_data, (bytes, bytearray)):
+                    img_bytes = bytes(foto_data)
+                # Caso 2: es un link http
+                elif isinstance(foto_data, str) and foto_data.startswith('http'):
+                    import urllib.request
+                    with urllib.request.urlopen(foto_data, timeout=10) as r:
+                        img_bytes = r.read()
+                # Caso 3: es un archivo /uploads/... o una ruta
+                elif isinstance(foto_data, str) and ('/' in foto_data or '\\' in foto_data) and len(foto_data) < 500 and 'data:image' not in foto_data:
+                    ruta = foto_data.lstrip('/').replace('uploads/', 'uploads/')
+                    if os.path.exists(ruta):
+                        with open(ruta, 'rb') as f:
+                            img_bytes = f.read()
+                    elif os.path.exists(os.path.join('static', ruta)):
+                        with open(os.path.join('static', ruta), 'rb') as f:
+                            img_bytes = f.read()
+                # Caso 4: es base64
+                elif isinstance(foto_data, str) and len(foto_data) > 100:
                     if ',' in foto_data:
                         foto_data = foto_data.split(',', 1)[1]
                     img_bytes = base64.b64decode(foto_data)
+
+                if img_bytes:
                     img = XLImage(io.BytesIO(img_bytes))
                     img.width = 140; img.height = 105
                     ws.add_image(img, f"{get_column_letter(len(headers))}{r_idx}")
-                except:
-                    pass
+            except Exception as e:
+                print("Error foto fila", r_idx, e)
+                pass
     output = io.BytesIO(); wb.save(output); output.seek(0)
     return send_file(output, as_attachment=True, download_name="encuestas_atenco.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 if __name__ == '__main__':
