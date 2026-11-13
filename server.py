@@ -4,6 +4,11 @@ from flask_socketio import SocketIO, emit
 import datetime, uuid, os
 import psycopg2
 import psycopg2.extras
+import io, base64
+from flask import send_file
+from openpyxl import Workbook
+from openpyxl.drawing.image import Image as XLImage
+from openpyxl.utils import get_column_letter
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'atenco-2026'
@@ -194,5 +199,64 @@ def api_actualizar():
         return jsonify({"ok": True, "mensaje": "Actualizado"})
     except Exception as e:
         return jsonify({"ok": False, "mensaje": "Error: " + str(e)}), 500
+@app.route('/export_excel')
+def export_excel():
+    if 'user' not in session:
+        return redirect('/login')
+    conn = db(); c = cur(conn)
+    c.execute("SELECT * FROM usuarias ORDER BY id DESC")
+    rows = c.fetchall()
+    # Si tu cur no regresa dict, convertir a dict
+    cols = [d[0] for d in c.description] if c.description else []
+    data = []
+    for r in rows:
+        if isinstance(r, dict):
+            data.append(r)
+        else:
+            data.append(dict(zip(cols, r)))
+    c.close(); conn.close()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Encuestas"
+    if not data:
+        ws['A1'] = "Sin registros"
+        output = io.BytesIO(); wb.save(output); output.seek(0)
+        return send_file(output, as_attachment=True, download_name="encuestas.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+    headers = list(data[0].keys())
+    foto_col = None
+    for cc in ['foto','imagen','photo','foto_base64']:
+        if cc in headers:
+            foto_col = cc; headers.remove(cc); break
+    headers.append('Foto')
+    ws.append(headers)
+    for i, h in enumerate(headers, 1):
+        ws.column_dimensions[get_column_letter(i)].width = 22
+    ws.column_dimensions[get_column_letter(len(headers))].width = 25
+
+    for r_idx, row in enumerate(data, start=2):
+        ws.row_dimensions[r_idx].height = 110
+        for c_idx, h in enumerate(headers, 1):
+            if h == 'Foto':
+                continue
+            val = row.get(h, '')
+            if isinstance(val, (datetime.datetime, datetime.date)):
+                val = val.strftime('%d/%m/%Y %H:%M')
+            ws.cell(row=r_idx, column=c_idx, value=str(val) if val is not None else '')
+        if foto_col:
+            foto_data = row.get(foto_col, '')
+            if foto_data and isinstance(foto_data, str) and len(foto_data) > 100:
+                try:
+                    if ',' in foto_data:
+                        foto_data = foto_data.split(',', 1)[1]
+                    img_bytes = base64.b64decode(foto_data)
+                    img = XLImage(io.BytesIO(img_bytes))
+                    img.width = 140; img.height = 105
+                    ws.add_image(img, f"{get_column_letter(len(headers))}{r_idx}")
+                except:
+                    pass
+    output = io.BytesIO(); wb.save(output); output.seek(0)
+    return send_file(output, as_attachment=True, download_name="encuestas_atenco.xlsx", mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
