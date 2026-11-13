@@ -279,7 +279,7 @@ socket.on('nueva_alerta', d=>{
   mostrar(d);
   activarParpadeo();
 });
-socket.on('ubicacion_update', d=>{ if(!actual || d.folio!==actual.folio) return; let la=parseFloat(d.lat ?? d.latitud ?? d.lat_panico ?? 0); let lo=parseFloat(d.lng ?? d.longitud ?? d.lng_panico ?? 0); if(!la || !lo) return; if(marker) marker.setLatLng([la,lo]); else marker=L.circleMarker([la,lo],{radius:14,color:'red',fillColor:'red',fillOpacity:1,weight:3}).addTo(map); map.setView([la,lo],17); document.getElementById('coords').innerText=la+', '+lo; });
+socket.on('ubicacion_update', d=>{ if(!actual || d.folio!==actual.folio) return; let la=parseFloat(d.lat ?? d.latitud ?? d.lat_panico ?? 0); let lo=parseFloat(d.lng ?? d.longitud ?? d.lng_panico ?? 0); if(!la || !lo) return; if(marker) marker.setLatLng([la,lo]); else marker=L.marker([la,lo]).addTo(map); map.setView([la,lo],17); document.getElementById('coords').innerText=la+', '+lo; });
 function atender(){ if(actual){ socket.emit('atender',{id:actual.id}); document.getElementById('rAtendido').innerText='Atendido'; document.getElementById('alarma').pause(); alert('Marcado como atendido'); } }
 function llamar(){ if(actual) window.location.href='tel:'+actual.celular; }
 fetch('/api/alertas').then(r=>r.json()).then(list=>{ let unicos={}; list.forEach(a=>{ unicos[a.folio]=a; }); list=Object.values(unicos); list.reverse().forEach(d=>{ let tr=document.createElement('tr'); tr.innerHTML='<td>'+d.folio+'</td><td>'+(d.folio_cad||'None')+'</td><td>'+d.nombres+'</td><td>'+d.apellidos+'</td><td>'+d.fecha+'</td>'; tr.onclick=()=>mostrar(d); document.getElementById('tabla').appendChild(tr); }); if(list.length) mostrar(list[list.length-1]); });
