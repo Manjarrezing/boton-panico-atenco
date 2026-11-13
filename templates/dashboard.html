@@ -256,11 +256,15 @@ function mostrar(d){
   document.getElementById('delito').innerText=d.tipo_delito||'-'; document.getElementById('imputado').innerText=d.imputado||'-';
   document.getElementById('parentesco').innerText=d.parentesco||'-'; document.getElementById('caract').innerText=d.caracteristicas||'-';
   document.getElementById('dirTxt').innerHTML='Calle: '+(d.calle||'')+' Número: '+(d.numero||'')+'<br>Entre Calles: '+(d.entre_calles||'')+'<br>Referencia: '+(d.referencia||'')+'<br>Localidad: '+(d.localidad||'')+'<br>Municipio: '+(d.municipio||'Xonacatlán')+'<br>Estado: '+(d.estado||'Estado de México')+'<br>C.P.: '+(d.cp||'');
-  document.getElementById('coords').innerText=d.lat+', '+d.lng+' Prec '+(d.precision||0)+'m';
-  document.getElementById('gmaps').href='https://www.google.com/maps?q='+d.lat+','+d.lng;
+ let lat = parseFloat(d.lat ?? d.latitud ?? d.latitude ?? d.lat_panico ?? 0);
+let lng = parseFloat(d.lng ?? d.lon ?? d.longitud ?? d.longitude ?? d.lng_panico ?? 0);
+document.getElementById('coords').innerText=lat+', '+lng+' Prec '+(d.precision||0)+' m';
+document.getElementById('gmaps').href='https://www.google.com/maps?q='+lat+','+lng;
+if(!isNaN(lat) && !isNaN(lng) && lat!=0){
   if(marker) map.removeLayer(marker);
-  marker=L.marker([d.lat,d.lng]).addTo(map).bindPopup('<b>'+d.nombres+'</b><br>'+d.celular).openPopup();
-  map.setView([d.lat,d.lng],17);
+  marker=L.marker([lat,lng]).addTo(map).bindPopup('<b>'+d.nombres+'</b><br>'+d.celular).openPopup();
+  map.setView([lat,lng],17);
+}
 }
 socket.on('nueva_alerta', d=>{
   document.querySelectorAll('#tabla tr').forEach(tr=>{ if(tr.textContent.includes(d.folio)) tr.remove(); });
@@ -274,7 +278,7 @@ socket.on('nueva_alerta', d=>{
   mostrar(d);
   activarParpadeo();
 });
-socket.on('ubicacion_update', d=>{ if(marker && actual && d.folio===actual.folio){ marker.setLatLng([d.lat,d.lng]); document.getElementById('coords').innerText=d.lat+', '+d.lng+' - EN VIVO'; } });
+socket.on('ubicacion_update', d=>{ if(marker && actual && d.folio===actual.folio){ marker.setLatLng([parseFloat(d.lat ?? d.latitud ?? 0), parseFloat(d.lng ?? d.longitud ?? 0)]); document.getElementById('coords').innerText=d.lat+', '+d.lng+' - EN VIVO'; } });
 function atender(){ if(actual){ socket.emit('atender',{id:actual.id}); document.getElementById('rAtendido').innerText='Atendido'; document.getElementById('alarma').pause(); alert('Marcado como atendido'); } }
 function llamar(){ if(actual) window.location.href='tel:'+actual.celular; }
 fetch('/api/alertas').then(r=>r.json()).then(list=>{ let unicos={}; list.forEach(a=>{ unicos[a.folio]=a; }); list=Object.values(unicos); list.reverse().forEach(d=>{ let tr=document.createElement('tr'); tr.innerHTML='<td>'+d.folio+'</td><td>'+(d.folio_cad||'None')+'</td><td>'+d.nombres+'</td><td>'+d.apellidos+'</td><td>'+d.fecha+'</td>'; tr.onclick=()=>mostrar(d); document.getElementById('tabla').appendChild(tr); }); if(list.length) mostrar(list[list.length-1]); });
