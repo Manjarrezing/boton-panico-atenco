@@ -4,7 +4,7 @@ from flask_socketio import SocketIO, emit
 import datetime, uuid, os
 import psycopg2
 import psycopg2.extras
-import io, base64 os
+import io, base64, os
 from flask import send_file
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image as XLImage
