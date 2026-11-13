@@ -244,7 +244,7 @@ def export_excel():
             if isinstance(val, (datetime.datetime, datetime.date)):
                 val = val.strftime('%d/%m/%Y %H:%M')
             ws.cell(row=r_idx, column=c_idx, value=str(val) if val is not None else '')
-               if foto_col:
+        if foto_col:
             foto_data = row.get(foto_col, '')
             img_bytes = None
             try:
